@@ -105,59 +105,55 @@ int System2User(int virtAddr, int len, char *buffer)
 	} while (i < len && oneChar != 0);
 	return i;
 }
-
-void ExceptionHandler(ExceptionType which)
+int MaxFileLength = 32;
+void
+ExceptionHandler(ExceptionType which)
 {
-	int type = kernel->machine->ReadRegister(2);
+    int type = kernel->machine->ReadRegister(2);
 
-	DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
+    DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
 
-	switch (which)
+    switch (which) {
+    case SyscallException:
+      switch(type) {
+      case SC_Halt:
+	DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
+
+	SysHalt();
+
+	ASSERTNOTREACHED();
+	break;
+
+      case SC_Add:
+	DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
+	
+	/* Process SysAdd Systemcall*/
+	int result;
+	result = SysAdd(/* int op1 */(int)kernel->machine->ReadRegister(4),
+			/* int op2 */(int)kernel->machine->ReadRegister(5));
+
+	DEBUG(dbgSys, "Add returning with " << result << "\n");
+	/* Prepare Result */
+	kernel->machine->WriteRegister(2, (int)result);
+	
+	/* Modify return point */
 	{
-	case NoException:
-		return;
+	  /* set previous programm counter (debugging only)*/
+	  kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
 
-	case SyscallException:
-		switch (type)
-		{
-		case SC_Halt:
-			DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
+	  /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+	  kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+	  
+	  /* set next programm counter for brach execution */
+	  kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+	}
 
-			SysHalt();
+	return;
+	
+	ASSERTNOTREACHED();
 
-			ASSERTNOTREACHED();
-			break;
-
-		case SC_Add:
-			DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
-
-			/* Process SysAdd Systemcall*/
-			int result;
-			result = SysAdd(/* int op1 */ (int)kernel->machine->ReadRegister(4),
-							/* int op2 */ (int)kernel->machine->ReadRegister(5));
-
-			DEBUG(dbgSys, "Add returning with " << result << "\n");
-			/* Prepare Result */
-			kernel->machine->WriteRegister(2, (int)result);
-
-			/* Modify return point */
-			{
-				/* set previous programm counter (debugging only)*/
-				kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
-
-				/* set programm counter to next instruction (all Instructions are 4 byte wide)*/
-				kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-				/* set next programm counter for brach execution */
-				kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-			}
-
-			return;
-
-			ASSERTNOTREACHED();
-
-			break;
-		case SC_Create:
+	break;
+	case SC_Create:
 		{
 			int virtAddr;
 			char *filename;
@@ -185,7 +181,7 @@ void ExceptionHandler(ExceptionType which)
 			//  hành Linux, chúng ta không quản ly trực tiếp các block trên
 			//  đĩa cứng cấp phát cho file, việc quản ly các block của file
 			//  trên ổ đĩa là một đồ án khác
-			if (!kernel->fileSystem->Create(filename))
+			if (!kernel->fileSystem->Create(filename,0))
 			{
 				printf("\n Error create file '%s'", filename);
 				DEBUG(dbgSys, "\n Error:Cannot create file.");
@@ -200,14 +196,15 @@ void ExceptionHandler(ExceptionType which)
 			delete filename;
 			break;
 		}
-		default:
-			cerr << "Unexpected system call " << type << "\n";
-			break;
-		}
-		break;
-	default:
-		cerr << "Unexpected user mode exception" << (int)which << "\n";
-		break;
-	}
-	ASSERTNOTREACHED();
+	
+      default:
+	cerr << "Unexpected system call " << type << "\n";
+	break;
+      }
+      break;
+    default:
+      cerr << "Unexpected user mode exception" << (int)which << "\n";
+      break;
+    }
+    ASSERTNOTREACHED();
 }

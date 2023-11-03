@@ -6,7 +6,7 @@ int main()
     int len;
     char filename[maxlen + 1];
     /*Create a file*/
-    if (Create("Text.txt") == -1)
+    if (Create("Hello.txt") == -1)
     {
         // xuất thông báo lỗi tạo tập tin
     }
