@@ -177,6 +177,47 @@ ThreadJoin:
 	syscall
 	j 	$31
 	.end ThreadJoin
+
+/* network */
+	.globl SocketTCP
+	.ent    SocketTCP
+SocketTCP:
+	addiu $2, $0, SC_SocketTCP
+	syscall
+	j 	$31
+	.end SocketTCP
+
+	.globl Connect
+	.ent    Connect
+Connect:
+	addiu $2, $0, SC_Connect
+	syscall
+	j 	$31
+	.end Connect
+
+	.globl Send
+	.ent    Send
+Send:
+	addiu $2, $0, SC_Send
+	syscall
+	j 	$31
+	.end Send
+
+	.globl Receive
+	.ent    Receive
+Receive:
+	addiu $2, $0, SC_Receive
+	syscall
+	j 	$31
+	.end Receive
+
+	.globl Close
+	.ent    Close
+Close:
+	addiu $2, $0, SC_Close
+	syscall
+	j 	$31
+	.end Close
 	
 /* dummy function to keep gcc happy */
         .globl  __main

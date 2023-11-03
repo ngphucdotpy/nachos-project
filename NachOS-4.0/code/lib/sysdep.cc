@@ -569,3 +569,21 @@ SendToSocket(int sockID, char *buffer, int packetSize, char *toName)
     // This may mask other kinds of failures, but it is the
     // right thing to do in the common case.
 }
+
+// int ConnectToSocket(int socketid, char *ip, int port) {
+//     struct sockaddr_in serv_addr;
+//     serv_addr.sin_family = AF_INET;
+//     serv_addr.sin_port = htons(port);
+    
+//     if(inet_pton(AF_INET, ip, &serv_addr.sin_addr)<=0) {
+//         printf("\nInvalid address/ Address not supported \n");
+//         return -1;
+//     }
+    
+//     if (connect(socketid, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+//         printf("\nConnection Failed \n");
+//         return -1;
+//     }
+    
+//     return 0;
+// }

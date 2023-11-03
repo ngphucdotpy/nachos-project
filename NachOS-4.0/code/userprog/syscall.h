@@ -37,6 +37,13 @@
 
 #define SC_Add		42
 
+// network
+#define SC_SocketTCP    50
+#define SC_Connect      51
+#define SC_Send         52
+#define SC_Receive      53
+#define SC_Close        54
+
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos
@@ -173,6 +180,27 @@ int ThreadJoin(ThreadId id);
  * Deletes current thread and returns ExitCode to every waiting lokal thread.
  */
 void ThreadExit(int ExitCode);	
+
+// network
+
+/* Cài đặt system call int SocketTCP(). 
+Bạn xây dựng một mảng các file descriptor table với kích thước là 20 file descriptors.
+Hàm system call "SocketTCP" sẽ trả về file descriptor id (int là một số nguyên integer), hoặc -1 nếu lỗi. */
+int SocketTCP();
+
+/* Cài đặt system call int Connect(int socketid, char *ip, int port). 
+Connect đến server theo thông tin IP và port. Trả về 0 nếu kết nối thành công, và -1 nếu bị lỗi */
+int Connect(int socketid, char *ip, int port);
+
+/* Cài đặt system call int Send(int socketid, char *buffer, int len), int Receive(int socketid, char *buffer, int len). Gửi và nhận dữ liệu từ socket.
+- Nếu thành công thì trả về số lượng bytes gửi đi hoặc nhận được
+- Nếu kết nối bị đóng trả về 0
+- Nếu thất bại trả về -1 */
+int Send(int socketid, char *buffer, int len);
+int Receive(int socketid, char *buffer, int len);
+
+/* Cài đặt system call int Close(int socketid). Đóng socket với 0 là thành công, -1 là lỗi. */
+int Close(int socketid);
 
 #endif /* IN_ASM */
 

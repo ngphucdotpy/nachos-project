@@ -72,4 +72,7 @@ extern bool PollSocket(int sockID);
 extern void ReadFromSocket(int sockID, char *buffer, int packetSize);
 extern void SendToSocket(int sockID, char *buffer, int packetSize,char *toName);
 
+// user define
+// extern int ConnectToSocket(int socketid, char *ip, int port);
+
 #endif // SYSDEP_H
