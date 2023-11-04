@@ -211,13 +211,13 @@ Receive:
 	j 	$31
 	.end Receive
 
-	.globl Close
-	.ent    Close
-Close:
-	addiu $2, $0, SC_Close
+	.globl Close_soc
+	.ent    Close_soc
+Close_soc:
+	addiu $2, $0, SC_Close_soc
 	syscall
 	j 	$31
-	.end Close
+	.end Close_soc
 	
 /* dummy function to keep gcc happy */
         .globl  __main

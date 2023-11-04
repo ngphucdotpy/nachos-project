@@ -69,10 +69,10 @@ extern void CloseSocket(int sockID);
 extern void AssignNameToSocket(char *socketName, int sockID);
 extern void DeAssignNameToSocket(char *socketName);
 extern bool PollSocket(int sockID);
-extern void ReadFromSocket(int sockID, char *buffer, int packetSize);
-extern void SendToSocket(int sockID, char *buffer, int packetSize,char *toName);
+extern int ReadFromSocket(int sockID, char *buffer, int packetSize);
+extern int SendToSocket(int sockID, char *buffer, int packetSize,char *toName);
 
 // user define
-// extern int ConnectToSocket(int socketid, char *ip, int port);
+extern int ConnectToSocket(int socketid, char *ip, int port);
 
 #endif // SYSDEP_H

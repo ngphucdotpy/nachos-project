@@ -42,7 +42,7 @@
 #define SC_Connect      51
 #define SC_Send         52
 #define SC_Receive      53
-#define SC_Close        54
+#define SC_Close_soc    54
 
 #ifndef IN_ASM
 

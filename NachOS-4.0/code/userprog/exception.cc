@@ -199,7 +199,7 @@ void ExceptionHandler(ExceptionType which)
 		}
 
 		// network
-		case SC_SocketTCP:
+		case SC_SocketTCP: {
 			int fd = OpenSocket();
 			if (fd != -1)
 				kernel->machine->WriteRegister(2, fd);
@@ -211,15 +211,18 @@ void ExceptionHandler(ExceptionType which)
 			return;
 			ASSERTNOTREACHED();
 			break;
+		}
 
-		case SC_Connect:
+		case SC_Connect: {
 			int socket_id = kernel->machine->ReadRegister(4);
 			int virtAddr = kernel->machine->ReadRegister(5);
 			int port = kernel->machine->ReadRegister(6);
 
 			char *ip = User2System(virtAddr, 16);
 
-			// result = ConnectToSocket()
+			result = ConnectToSocket(socket_id, ip, port);
+
+			kernel->machine->WriteRegister(2, result);
 			
 			increasePC();
 			delete ip;
@@ -227,32 +230,46 @@ void ExceptionHandler(ExceptionType which)
 			return;
 			ASSERTNOTREACHED();
 			break;
+		}
 
-		case SC_Send:
+		case SC_Send: {
 			int socket_id = kernel->machine->ReadRegister(4);
 			int virtAddr = kernel->machine->ReadRegister(5);
-			int port = kernel->machine->ReadRegister(6);
+			int len = kernel->machine->ReadRegister(6);
+			
+			char *buffer = User2System(virtAddr, len + 1);
 
-			char *buffer = User2System(virtAddr, 10);
-
-			// in progress
+			char sockName[32];
+			sprintf(sockName, "SOCKET_%d", kernel->hostName);
+			result = SendToSocket(socket_id, buffer, len, sockName);
+			kernel->machine->WriteRegister(2, result);
 			
 			increasePC();
-			delete ip;
+			delete buffer;
 
 			return;
 			ASSERTNOTREACHED();
 			break;
+		}
 
-		case SC_Receive:
+		case SC_Receive: {
+			int socket_id = kernel->machine->ReadRegister(4);
+			int virtAddr = kernel->machine->ReadRegister(5);
+			int len = kernel->machine->ReadRegister(6);
+			
+			char *buffer = new char[len + 1];
+			result = ReadFromSocket(socket_id, buffer, len);
+			System2User(virtAddr, len, buffer);
+			kernel->machine->WriteRegister(2, result);
 
 			increasePC();
 
 			return;
 			ASSERTNOTREACHED();
 			break;
+		}
 
-		case SC_Close:
+		case SC_Close_soc: {
 			int fd = kernel->machine->ReadRegister(4);
 
 			if (fd != -1)
@@ -266,6 +283,7 @@ void ExceptionHandler(ExceptionType which)
 			return;
 			ASSERTNOTREACHED();
 			break;
+		}
 
 		default:
 			cerr << "Unexpected system call " << type << "\n";
