@@ -191,21 +191,26 @@ void ExceptionHandler(ExceptionType which)
 				delete filename;
 				return;
 			}
+			
 			kernel->machine->WriteRegister(2, 0); // trả về cho chương trình
 												  // người dùng thành công
 			increasePC();
 			delete filename;
+			
+			return;
+			ASSERTNOTREACHED();
 			break;
 		}
 
 		// network
-		case SC_SocketTCP: {
+		case SC_SocketTCP:
+		{
 			int fd = OpenSocket();
 			if (fd != -1)
 				kernel->machine->WriteRegister(2, fd);
 			else
 				kernel->machine->WriteRegister(2, -1);
-			
+
 			increasePC();
 
 			return;
@@ -213,7 +218,8 @@ void ExceptionHandler(ExceptionType which)
 			break;
 		}
 
-		case SC_Connect: {
+		case SC_Connect:
+		{
 			int socket_id = kernel->machine->ReadRegister(4);
 			int virtAddr = kernel->machine->ReadRegister(5);
 			int port = kernel->machine->ReadRegister(6);
@@ -223,7 +229,7 @@ void ExceptionHandler(ExceptionType which)
 			result = ConnectToSocket(socket_id, ip, port);
 
 			kernel->machine->WriteRegister(2, result);
-			
+
 			increasePC();
 			delete ip;
 
@@ -232,18 +238,19 @@ void ExceptionHandler(ExceptionType which)
 			break;
 		}
 
-		case SC_Send: {
+		case SC_Send:
+		{
 			int socket_id = kernel->machine->ReadRegister(4);
 			int virtAddr = kernel->machine->ReadRegister(5);
 			int len = kernel->machine->ReadRegister(6);
-			
+
 			char *buffer = User2System(virtAddr, len + 1);
 
 			char sockName[32];
 			sprintf(sockName, "SOCKET_%d", kernel->hostName);
 			result = SendToSocket(socket_id, buffer, len, sockName);
 			kernel->machine->WriteRegister(2, result);
-			
+
 			increasePC();
 			delete buffer;
 
@@ -252,11 +259,12 @@ void ExceptionHandler(ExceptionType which)
 			break;
 		}
 
-		case SC_Receive: {
+		case SC_Receive:
+		{
 			int socket_id = kernel->machine->ReadRegister(4);
 			int virtAddr = kernel->machine->ReadRegister(5);
 			int len = kernel->machine->ReadRegister(6);
-			
+
 			char *buffer = new char[len + 1];
 			result = ReadFromSocket(socket_id, buffer, len);
 			System2User(virtAddr, len, buffer);
@@ -269,7 +277,8 @@ void ExceptionHandler(ExceptionType which)
 			break;
 		}
 
-		case SC_Close_soc: {
+		case SC_Close_soc:
+		{
 			int fd = kernel->machine->ReadRegister(4);
 
 			if (fd != -1)
