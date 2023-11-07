@@ -25,6 +25,11 @@
 #include "main.h"
 #include "syscall.h"
 #include "ksyscall.h"
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 //----------------------------------------------------------------------
 // ExceptionHandler
 // 	Entry point into the Nachos kernel.  Called when a user program
@@ -57,8 +62,6 @@ void increasePC()
 
 	/* set next programm counter for brach execution */
 	kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-
 }
 
 // Input: - User space address (int)
@@ -193,12 +196,12 @@ void ExceptionHandler(ExceptionType which)
 				delete filename;
 				return;
 			}
-			
+
 			kernel->machine->WriteRegister(2, 0); // trả về cho chương trình
 												  // người dùng thành công
 			increasePC();
 			delete filename;
-			
+
 			return;
 			ASSERTNOTREACHED();
 			break;
@@ -211,7 +214,7 @@ void ExceptionHandler(ExceptionType which)
 			int type = kernel->machine->ReadRegister(5);
 			char *filename;
 			filename = User2System(virtAddr, MaxFileLength);
-			DEBUG(dbgSys, "Mo file " << filename <<". Type: " <<type <<"\n");
+			DEBUG(dbgSys, "Mo file " << filename << ". Type: " << type << "\n");
 			int freeSlot = kernel->fileSystem->FindFreeSlot();
 			if (freeSlot != -1)
 			{
@@ -222,56 +225,74 @@ void ExceptionHandler(ExceptionType which)
 						DEBUG(dbgSys, "Mo File Thanh Cong. FileID: " << freeSlot << "\n");
 						kernel->machine->WriteRegister(2, freeSlot);
 					}
-					else {
-						DEBUG(dbgSys, "Khong the mo file." << "\n");
+					else
+					{
+						DEBUG(dbgSys, "Khong the mo file."
+										  << "\n");
 						kernel->machine->WriteRegister(2, -1);
-
 					}
 				}
 				else if (type == 2)
 				{
 					kernel->machine->WriteRegister(2, 0); // Vi tri ID 0 stdin
 				}
-				else if (type==3)
+				else if (type == 3)
 				{
 					kernel->machine->WriteRegister(2, 1); // Vi tri ID 1 stdout
 				}
-				else {
+				else
+				{
 					// Neu khong mo duoc file
-					DEBUG(dbgSys, "Khong the mo file." << "\n");
+					DEBUG(dbgSys, "Khong the mo file."
+									  << "\n");
 					kernel->machine->WriteRegister(2, -1);
 				}
 			}
-			else {
-				DEBUG(dbgSys, "Khong the mo file." << "\n");
+			else
+			{
+				DEBUG(dbgSys, "Khong the mo file."
+								  << "\n");
 				kernel->machine->WriteRegister(2, -1);
 			}
-			DEBUG(dbgSys, "Tang bien PC " << "\n");
+			DEBUG(dbgSys, "Tang bien PC "
+							  << "\n");
 			increasePC();
 			delete[] filename;
+
+			return;
+			ASSERTNOTREACHED();
 			break;
 		}
 		case SC_Close:
 		{
-			//Doc id cua file(OpenFileID)
+			// Doc id cua file(OpenFileID)
 			int id = kernel->machine->ReadRegister(4);
-			if (id >= 0 && id <= 19) 
+			if (id >= 0 && id <= 19)
 			{
-				if (kernel->fileSystem->fileDes[id]) //neu co mo file
+				if (kernel->fileSystem->fileDes[id]) // neu co mo file
 				{
 					delete kernel->fileSystem->fileDes[id];
 					kernel->fileSystem->fileDes[id] = NULL;
 					kernel->machine->WriteRegister(2, 0);
+<<<<<<< HEAD
 					DEBUG(dbgSys, "Dong file so " << id << " thanh cong" << "\n");
 					DEBUG(dbgSys, "Tang bien PC " << "\n");
 					increasePC();
 					break;
+=======
+					DEBUG(dbgSys, "Dong file so " << id << " thanh cong "
+												  << "\n");
+>>>>>>> 48f0ade793762602eb94e55c948cfed9ae87ff60
 				}
 			}
 			
 			kernel->machine->WriteRegister(2, -1);
 			increasePC();
-			DEBUG(dbgSys, "Tang bien PC " << "\n");
+			DEBUG(dbgSys, "Tang bien PC "
+							  << "\n");
+
+			return;
+			ASSERTNOTREACHED();
 			break;
 		}
 
@@ -312,12 +333,14 @@ void ExceptionHandler(ExceptionType which)
 		// network
 		case SC_SocketTCP:
 		{
-			int sid = OpenSocket();
-			if (sid != -1) {
+			int sid = socket(AF_INET, SOCK_STREAM, 0);
+			if (sid != -1)
+			{
 				DEBUG(dbgSys, "Socked created. SocID: " << sid << "\n");
 				kernel->machine->WriteRegister(2, sid);
 			}
-			else {
+			else
+			{
 				DEBUG(dbgSys, "Failed. SocID: " << sid << "\n");
 				kernel->machine->WriteRegister(2, -1);
 			}
@@ -337,9 +360,24 @@ void ExceptionHandler(ExceptionType which)
 
 			char *ip = User2System(virtAddr, 16);
 
-			result = ConnectToSocket(socket_id, ip, port);
+			int result = 0;
 
+			struct sockaddr_in svr_addr;
+			bzero(&svr_addr, sizeof(svr_addr));
+			svr_addr.sin_family = AF_INET;
+			svr_addr.sin_addr.s_addr = inet_addr(ip);
+			svr_addr.sin_port = htons(port);
+			
+			if (connect(socket_id, (struct sockaddr *)&svr_addr, sizeof(svr_addr)) < 0)
+			    result = -1;
+			
 			kernel->machine->WriteRegister(2, result);
+
+			if (result == -1) {
+				DEBUG(dbgSys, "Failed to connect\n")
+			}
+			else
+				DEBUG(dbgSys, "Connected\n");
 
 			increasePC();
 			delete ip;
@@ -357,10 +395,8 @@ void ExceptionHandler(ExceptionType which)
 
 			char *buffer = User2System(virtAddr, len + 1);
 
-			char sockName[32];
-			sprintf(sockName, "SOCKET_%d", kernel->hostName);
-			result = SendToSocket(socket_id, buffer, len, sockName);
-			kernel->machine->WriteRegister(2, result);
+			if (send(socket_id, buffer, len, 0) == 0)
+				DEBUG(dbgSys, "Sent");
 
 			increasePC();
 			delete buffer;
@@ -377,9 +413,12 @@ void ExceptionHandler(ExceptionType which)
 			int len = kernel->machine->ReadRegister(6);
 
 			char *buffer = new char[len + 1];
-			result = ReadFromSocket(socket_id, buffer, len);
+			read(socket_id, buffer, len);
+			// result = ReadFromSocket(socket_id, buffer, len);
 			System2User(virtAddr, len, buffer);
 			kernel->machine->WriteRegister(2, result);
+
+			DEBUG(dbgSys, "Received: " << buffer << "\n");
 
 			increasePC();
 
@@ -388,16 +427,20 @@ void ExceptionHandler(ExceptionType which)
 			break;
 		}
 
-		case SC_Close_soc:
+		case SC_Close_:
 		{
-			int fd = kernel->machine->ReadRegister(4);
+			int sid = kernel->machine->ReadRegister(4);
+			int result = close(sid);
 
-			if (fd != -1)
+			if (result == 0) {
 				kernel->machine->WriteRegister(2, 0);
-			else
+				DEBUG(dbgSys, "Socked closed. SocID: " << sid << "\n");
+			}
+			else {
 				kernel->machine->WriteRegister(2, -1);
+				DEBUG(dbgSys, "Failed to close. SocID: " << sid << "\n");
+			}				
 
-			CloseSocket(fd);
 			increasePC();
 
 			return;

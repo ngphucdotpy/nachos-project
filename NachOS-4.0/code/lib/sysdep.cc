@@ -516,10 +516,13 @@ PollSocket(int sockID)
 // ReadFromSocket
 // 	Read a fixed size packet off the IPC port.  Abort on error.
 //----------------------------------------------------------------------
-int
+void
 ReadFromSocket(int sockID, char *buffer, int packetSize)
 {
     int retVal;
+#if defined(__GNUC__) && __GNUC__ < 3
+    extern int errno;
+#endif
     struct sockaddr_un uName;
 #ifdef LINUX
     socklen_t size = sizeof(uName);
@@ -538,11 +541,9 @@ ReadFromSocket(int sockID, char *buffer, int packetSize)
 #else 	
         cerr << "called with " << packetSize << ", got back " << retVal 
 						<< ", and " << errno << "\n";
-#endif
-        if (retVal < 0) return -1;
+#endif 
     }
-    if (retVal == packetSize) return retVal; // ASSERT(retVal == packetSize);
-    return 0;
+    ASSERT(retVal == packetSize);
 }
 
 //----------------------------------------------------------------------
@@ -554,7 +555,7 @@ ReadFromSocket(int sockID, char *buffer, int packetSize)
 //      to get set up.
 //      Terminate if we still fail after 10 tries.
 //----------------------------------------------------------------------
-int
+void
 SendToSocket(int sockID, char *buffer, int packetSize, char *toName)
 {
     struct sockaddr_un uName;
@@ -566,37 +567,18 @@ SendToSocket(int sockID, char *buffer, int packetSize, char *toName)
     for(retryCount=0;retryCount < 10;retryCount++) {
       retVal = sendto(sockID, buffer, packetSize, 0, 
 			(struct sockaddr *) &uName, sizeof(uName));
-      if (retVal == packetSize) return retVal;
+      if (retVal == packetSize) return;
       // if we did not succeed, we should see a negative
       // return value indicating complete failure.  If we
       // don't, something fishy is going on...
-      if (retVal < 0) return -1; // ASSERT(retVal < 0);
+      ASSERT(retVal < 0);
       // wait a second before trying again
       Delay(1);
     }
-    return 0;
     // At this point, we have failed many times
     // The most common reason for this is that the target machine
     // has halted and its socket no longer exists.
     // We simply do nothing (drop the packet).
     // This may mask other kinds of failures, but it is the
     // right thing to do in the common case.
-}
-
-int ConnectToSocket(int socketid, char *ip, int port) {
-    struct sockaddr_in serv_addr;
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(port);
-    
-    if(inet_pton(AF_INET, ip, &serv_addr.sin_addr)<=0) {
-        printf("\nInvalid address/ Address not supported \n");
-        return -1;
-    }
-    
-    if (connect(socketid, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-        printf("\nConnection Failed \n");
-        return -1;
-    }
-    
-    return 0;
 }
