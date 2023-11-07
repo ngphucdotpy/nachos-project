@@ -57,8 +57,6 @@ void increasePC()
 
 	/* set next programm counter for brach execution */
 	kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-
 }
 
 // Input: - User space address (int)
@@ -193,12 +191,12 @@ void ExceptionHandler(ExceptionType which)
 				delete filename;
 				return;
 			}
-			
+
 			kernel->machine->WriteRegister(2, 0); // trả về cho chương trình
 												  // người dùng thành công
 			increasePC();
 			delete filename;
-			
+
 			return;
 			ASSERTNOTREACHED();
 			break;
@@ -211,7 +209,7 @@ void ExceptionHandler(ExceptionType which)
 			int type = kernel->machine->ReadRegister(5);
 			char *filename;
 			filename = User2System(virtAddr, MaxFileLength);
-			DEBUG(dbgSys, "Mo file " << filename <<". Type: " <<type <<"\n");
+			DEBUG(dbgSys, "Mo file " << filename << ". Type: " << type << "\n");
 			int freeSlot = kernel->fileSystem->FindFreeSlot();
 			if (freeSlot != -1)
 			{
@@ -222,52 +220,244 @@ void ExceptionHandler(ExceptionType which)
 						DEBUG(dbgSys, "Mo File Thanh Cong. FileID: " << freeSlot << "\n");
 						kernel->machine->WriteRegister(2, freeSlot);
 					}
-					else {
-						DEBUG(dbgSys, "Khong the mo file." << "\n");
+					else
+					{
+						DEBUG(dbgSys, "Khong the mo file."
+										  << "\n");
 						kernel->machine->WriteRegister(2, -1);
-
 					}
 				}
 				else if (type == 2)
 				{
 					kernel->machine->WriteRegister(2, 0); // Vi tri ID 0 stdin
 				}
-				else if (type==3)
+				else if (type == 3)
 				{
 					kernel->machine->WriteRegister(2, 1); // Vi tri ID 1 stdout
 				}
-				else {
+				else
+				{
 					// Neu khong mo duoc file
-					DEBUG(dbgSys, "Khong the mo file." << "\n");
+					DEBUG(dbgSys, "Khong the mo file."
+									  << "\n");
 					kernel->machine->WriteRegister(2, -1);
 				}
 			}
-			else {
-				DEBUG(dbgSys, "Khong the mo file." << "\n");
+			else
+			{
+				DEBUG(dbgSys, "Khong the mo file."
+								  << "\n");
 				kernel->machine->WriteRegister(2, -1);
 			}
-			DEBUG(dbgSys, "Tang bien PC " << "\n");
+			DEBUG(dbgSys, "Tang bien PC "
+							  << "\n");
 			increasePC();
 			delete[] filename;
+			return;
+			ASSERTNOTREACHED();
 			break;
 		}
 		case SC_Close:
 		{
-			//Doc id cua file(OpenFileID)
+			DEBUG(dbgSys, "Vao case SC_Close. ");
+
+			// Doc id cua file(OpenFileID)
 			int id = kernel->machine->ReadRegister(4);
-			if (id >= 0 && id <= 19) 
+			if (id >= 0 && id <= 19)
 			{
-				if (kernel->fileSystem->fileDes[id]) //neu co mo file
+				if (kernel->fileSystem->fileDes[id]) // neu co mo file
 				{
 					delete kernel->fileSystem->fileDes[id];
 					kernel->fileSystem->fileDes[id] = NULL;
 					kernel->machine->WriteRegister(2, 0);
-					DEBUG(dbgSys, "Dong file so " << id << " thanh cong " << "\n");
+					DEBUG(dbgSys, "Dong file so " << id << " thanh cong "
+												  << "\n");
 				}
 			}
 			kernel->machine->WriteRegister(2, -1);
 			increasePC();
-			DEBUG(dbgSys, "Tang bien PC " << "\n");
+			DEBUG(dbgSys, "Tang bien PC "
+							  << "\n");
+			return;
+			ASSERTNOTREACHED();
+			break;
+		}
+		case SC_Read:
+		{
+			// Doc id cua file(OpenFileID)
+			// int id = kernel->machine->ReadRegister(4);
+			DEBUG(dbgSys, "Vao case SC_Read. ");
+			int virtAddr = kernel->machine->ReadRegister(4);
+			int size = kernel->machine->ReadRegister(5);
+			int id = kernel->machine->ReadRegister(6);
+			char *buffer;
+			buffer = User2System(virtAddr, size);
+			OpenFile *fileopen = kernel->fileSystem->fileDes[id];
+			DEBUG(dbgSys, "Read file " << buffer << ". Size: " << size << ", ID:" << id << ", Type:" << fileopen->type << "\n");
+
+			if (id < 0 || id > 19)
+			{
+				printf("Khong the mo file.\n");
+				DEBUG(dbgSys, "Khong the read file do id file khong thuoc file descriptor table.\n");
+				kernel->machine->WriteRegister(2, -1);
+				increasePC();
+
+				return;
+			}
+			if (kernel->fileSystem->fileDes[id] == NULL)
+			{
+				printf("Khong the mo file khong ton tai.\n");
+				DEBUG(dbgSys, "Khong the read file KHONG ton tai.\n");
+				kernel->machine->WriteRegister(2, -1);
+				increasePC();
+
+				return;
+			}
+			if (kernel->fileSystem->fileDes[id]->type == 3)
+			{
+				printf("Khong the mo file Console output.\n");
+				DEBUG(dbgSys, "Khong the read file Console output..\n");
+				kernel->machine->WriteRegister(2, -1);
+				increasePC();
+
+				return;
+			}
+
+			char ch;
+			
+			// Read file bang stdin
+			if (kernel->fileSystem->fileDes[id]->type == 2)
+			{
+				printf("Read file Console input.\n");
+				DEBUG(dbgSys, "Read file Console input.\n");
+				// Convert data in buffer to 0
+				for (int i = 0; i < size; i++)
+				{
+					buffer[i] = 0;
+				}
+
+				// Use class SynchConsoleInput to get data from console
+				int loop = 0;
+				// char *filename = NULL;
+				// kernel->synchConsoleIn;
+				// SynchConsoleInput* conslInput = new SynchConsoleInput(NULL);
+					DEBUG(dbgSys, "Vao Loop-----------------------------------------\n");
+					DEBUG(dbgSys, "Nhap Buffer: ");
+				while (loop < size)
+				{
+					// Create class SynchConsoleInput
+
+					do
+					{						
+						ch = kernel->GetChar();
+						
+					} while (ch == EOF);
+
+					if ((ch == '\012') || (ch == '\001'))
+					{
+						break;
+					}
+					else
+					{
+						buffer[loop] = ch;
+						++loop;
+					}
+					
+				}
+					DEBUG(dbgSys, "Buffer: "<<buffer<<"\n");
+
+					DEBUG(dbgSys, "Xong Loop-----------------------------------------\n");
+
+				int size_buff = 0;
+				if (ch == '\001')
+				{
+					size_buff = -1;
+				}
+				else
+				{
+					size_buff = loop;
+				}
+				DEBUG(dbgSys, " Byte read: "<<size_buff<<"\n");
+				System2User(virtAddr, size_buff, buffer);
+
+				kernel->machine->WriteRegister(2, size_buff);
+				delete buffer;
+				DEBUG(dbgSys, "Read file thanh cong\n");
+				increasePC();
+				return;
+			}
+			// truong hop Read file binh thuong
+			int OldPosition = kernel->fileSystem->fileDes[id]->GetPosition();
+			if (kernel->fileSystem->fileDes[id]->Read(buffer, size) > 0)
+			{
+				int NewPosition = kernel->fileSystem->fileDes[id]->GetPosition();
+				
+				
+				System2User(virtAddr, NewPosition - OldPosition, buffer);
+				kernel->machine->WriteRegister(2, NewPosition - OldPosition);
+
+				DEBUG(dbgSys, "Read file thanh cong, So byte: "<<NewPosition - OldPosition<<", Buffer: "<<buffer<<"\n");
+			}
+			else
+			{
+				DEBUG(dbgSys, "Read file Rong\n");
+				kernel->machine->WriteRegister(2, -1);
+			}
+			increasePC();
+			DEBUG(dbgSys, "Tang bien PC "<< "\n");
+			return;
+			ASSERTNOTREACHED();
+			break;
+		}
+		case SC_Write:
+		{
+			// Doc id cua file(OpenFileID)
+			// int id = kernel->machine->ReadRegister(4);
+			DEBUG(dbgSys, "Vao case SC_Write. ");
+			DEBUG(dbgSys, "Write file thanh cong\n");
+			// if (id >= 0 && id <= 19)
+			// {
+			// 	if (kernel->fileSystem->fileDes[id]) // neu co mo file
+			// 	{
+			// 		delete kernel->fileSystem->fileDes[id];
+			// 		kernel->fileSystem->fileDes[id] = NULL;
+			// 		kernel->machine->WriteRegister(2, 0);
+			// 		DEBUG(dbgSys, "Dong file so " << id << " thanh cong "
+			// 									  << "\n");
+			// 	}
+			// }
+			kernel->machine->WriteRegister(2, -1);
+			increasePC();
+			DEBUG(dbgSys, "Tang bien PC "
+							  << "\n");
+			return;
+			ASSERTNOTREACHED();
+			break;
+		}
+		case SC_Seek:
+		{
+			// Doc id cua file(OpenFileID)
+			// int id = kernel->machine->ReadRegister(4);
+			DEBUG(dbgSys, "Vao case SC_Seek. \n");
+			DEBUG(dbgSys, "Seek file thanh cong\n");
+
+			// if (id >= 0 && id <= 19)
+			// {
+			// 	if (kernel->fileSystem->fileDes[id]) // neu co mo file
+			// 	{
+			// 		delete kernel->fileSystem->fileDes[id];
+			// 		kernel->fileSystem->fileDes[id] = NULL;
+			// 		kernel->machine->WriteRegister(2, 0);
+			// 		DEBUG(dbgSys, "Dong file so " << id << " thanh cong "
+			// 									  << "\n");
+			// 	}
+			// }
+			kernel->machine->WriteRegister(2, -1);
+			increasePC();
+			DEBUG(dbgSys, "Tang bien PC "
+							  << "\n");
+			return;
+			ASSERTNOTREACHED();
 			break;
 		}
 
@@ -275,11 +465,13 @@ void ExceptionHandler(ExceptionType which)
 		case SC_SocketTCP:
 		{
 			int sid = OpenSocket();
-			if (sid != -1) {
+			if (sid != -1)
+			{
 				DEBUG(dbgSys, "Socked created. SocID: " << sid << "\n");
 				kernel->machine->WriteRegister(2, sid);
 			}
-			else {
+			else
+			{
 				DEBUG(dbgSys, "Failed. SocID: " << sid << "\n");
 				kernel->machine->WriteRegister(2, -1);
 			}
