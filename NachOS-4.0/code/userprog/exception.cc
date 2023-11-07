@@ -57,6 +57,8 @@ void increasePC()
 
 	/* set next programm counter for brach execution */
 	kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+
+
 }
 
 // Input: - User space address (int)
@@ -202,6 +204,62 @@ void ExceptionHandler(ExceptionType which)
 			break;
 		}
 
+		case SC_Open:
+		{
+			DEBUG(dbgSys, "Vao case SC_Open: " << "\n");
+			int virtAddr = kernel->machine->ReadRegister(4);
+			int type = kernel->machine->ReadRegister(5);
+			char *filename;
+			filename = User2System(virtAddr, MaxFileLength);
+			int freeSlot = kernel->fileSystem->FindFreeSlot();
+			if (freeSlot != -1)
+			{
+				if (type == 0 || type == 1)
+				{ // 0: read and write 	1: read only
+					if ((kernel->fileSystem->fileDes[freeSlot] = kernel->fileSystem->Open(filename, type)) != NULL)
+					{
+						DEBUG(dbgSys, "Mo File Thanh Cong. FileID: " << freeSlot << "\n");
+						kernel->machine->WriteRegister(2, freeSlot);
+					}
+				}
+				else if (type == 2)
+				{
+					kernel->machine->WriteRegister(2, 0); // Vi tri ID 0 stdin
+				}
+				else if (type==3)
+				{
+					kernel->machine->WriteRegister(2, 1); // Vi tri ID 1 stdout
+				}
+				else {
+					// Neu khong mo duoc file
+					kernel->machine->WriteRegister(2, -1);
+				}
+				increasePC();
+				DEBUG(dbgSys, "Tang bien PC " << "\n");
+			}
+			delete[] filename;
+			break;
+		}
+		case SC_Close:
+		{
+			//Doc id cua file(OpenFileID)
+			int id = kernel->machine->ReadRegister(4);
+			if (id >= 0 && id <= 19) 
+			{
+				if (kernel->fileSystem->fileDes[id]) //neu co mo file
+				{
+					delete kernel->fileSystem->fileDes[id];
+					kernel->fileSystem->fileDes[id] = NULL;
+					kernel->machine->WriteRegister(2, 0);
+					DEBUG(dbgSys, "Dong file so " << id << " thanh cong " << "\n");
+				}
+			}
+			kernel->machine->WriteRegister(2, -1);
+			increasePC();
+			DEBUG(dbgSys, "Tang bien PC " << "\n");
+			break;
+		}
+
 		// network
 		case SC_SocketTCP:
 		{
@@ -307,5 +365,4 @@ void ExceptionHandler(ExceptionType which)
 		cerr << "Unexpected user mode exception" << (int)which << "\n";
 		break;
 	}
-	ASSERTNOTREACHED();
 }
