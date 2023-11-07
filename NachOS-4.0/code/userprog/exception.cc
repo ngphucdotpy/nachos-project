@@ -205,11 +205,15 @@ void ExceptionHandler(ExceptionType which)
 		// network
 		case SC_SocketTCP:
 		{
-			int fd = OpenSocket();
-			if (fd != -1)
-				kernel->machine->WriteRegister(2, fd);
-			else
+			int sid = OpenSocket();
+			if (sid != -1) {
+				DEBUG(dbgSys, "Socked created. SocID: " << sid << "\n");
+				kernel->machine->WriteRegister(2, sid);
+			}
+			else {
+				DEBUG(dbgSys, "Failed. SocID: " << sid << "\n");
 				kernel->machine->WriteRegister(2, -1);
+			}
 
 			increasePC();
 

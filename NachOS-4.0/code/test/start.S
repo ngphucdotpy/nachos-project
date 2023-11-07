@@ -178,7 +178,7 @@ ThreadJoin:
 	j 	$31
 	.end ThreadJoin
 
-/* network */
+
 	.globl SocketTCP
 	.ent    SocketTCP
 SocketTCP:
