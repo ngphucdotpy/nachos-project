@@ -42,7 +42,7 @@
 #define SC_Connect      51
 #define SC_Send         52
 #define SC_Receive      53
-#define SC_Close_soc    54
+#define SC_Close_       54
 
 #ifndef IN_ASM
 
@@ -202,7 +202,7 @@ int Send(int socketid, char *buffer, int len);
 int Receive(int socketid, char *buffer, int len);
 
 /* Cài đặt system call int Close(int socketid). Đóng socket với 0 là thành công, -1 là lỗi. */
-int Close(int socketid);
+int Close_(int socketid);
 
 #endif /* IN_ASM */
 
