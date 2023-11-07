@@ -274,15 +274,8 @@ void ExceptionHandler(ExceptionType which)
 					delete kernel->fileSystem->fileDes[id];
 					kernel->fileSystem->fileDes[id] = NULL;
 					kernel->machine->WriteRegister(2, 0);
-<<<<<<< HEAD
-					DEBUG(dbgSys, "Dong file so " << id << " thanh cong" << "\n");
-					DEBUG(dbgSys, "Tang bien PC " << "\n");
-					increasePC();
-					break;
-=======
 					DEBUG(dbgSys, "Dong file so " << id << " thanh cong "
 												  << "\n");
->>>>>>> 48f0ade793762602eb94e55c948cfed9ae87ff60
 				}
 			}
 			
