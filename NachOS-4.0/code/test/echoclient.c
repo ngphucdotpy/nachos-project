@@ -7,12 +7,18 @@ int main()
     int sid = SocketTCP();
     char ip[] = "127.0.0.1";
     int port = 1234;
-    char buffer[] = "testtest";
-    int len = 8;
+    char buffer[] = "teeepppp";
+    int len = strlen(buffer);
 
-    Connect(sid, ip, port);
-    Send(sid, buffer, len);
-    Close(sid);
+    int cn = Connect(sid, ip, port);
+    if (cn == 0)
+    {
+        Send(sid, buffer, len);
+    }
+    char *bu2;
+    Receive(sid, bu2, len);
+    
+    Close_(sid);
 
     Halt();
 }
