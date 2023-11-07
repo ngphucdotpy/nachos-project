@@ -202,11 +202,12 @@ void ExceptionHandler(ExceptionType which)
 
 		case SC_Open:
 		{
-			DEBUG(dbgSys, "Vao case SC_Open: " << "\n");
+			DEBUG(dbgSys, "Vao case SC_Open. ");
 			int virtAddr = kernel->machine->ReadRegister(4);
 			int type = kernel->machine->ReadRegister(5);
 			char *filename;
 			filename = User2System(virtAddr, MaxFileLength);
+			DEBUG(dbgSys, "Mo file " << filename <<". Type: " <<type <<"\n");
 			int freeSlot = kernel->fileSystem->FindFreeSlot();
 			if (freeSlot != -1)
 			{
@@ -216,6 +217,11 @@ void ExceptionHandler(ExceptionType which)
 					{
 						DEBUG(dbgSys, "Mo File Thanh Cong. FileID: " << freeSlot << "\n");
 						kernel->machine->WriteRegister(2, freeSlot);
+					}
+					else {
+						DEBUG(dbgSys, "Khong the mo file." << "\n");
+						kernel->machine->WriteRegister(2, -1);
+
 					}
 				}
 				else if (type == 2)
@@ -228,11 +234,16 @@ void ExceptionHandler(ExceptionType which)
 				}
 				else {
 					// Neu khong mo duoc file
+					DEBUG(dbgSys, "Khong the mo file." << "\n");
 					kernel->machine->WriteRegister(2, -1);
 				}
-				increasePC();
-				DEBUG(dbgSys, "Tang bien PC " << "\n");
 			}
+			else {
+				DEBUG(dbgSys, "Khong the mo file." << "\n");
+				kernel->machine->WriteRegister(2, -1);
+			}
+			DEBUG(dbgSys, "Tang bien PC " << "\n");
+			increasePC();
 			delete[] filename;
 			break;
 		}
