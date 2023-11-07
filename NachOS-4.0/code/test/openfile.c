@@ -5,9 +5,11 @@ int main()
 {
     int len;
     char filename[maxlen];
+    int fileid;
     /*Create a file*/
-    int fileid = Open("Hello.txt",0);
+    Create("Hello.txt");
+    fileid = Open("Hello.txt",1);
     Close(fileid);
-    Open("notfound.txt",0);
+    Remove("Hello.txt");
     Halt();
 }

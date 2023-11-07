@@ -316,6 +316,13 @@ OpenForWrite(char *name)
     return fd;
 }
 
+
+int OpenForRead(char *name)
+{
+    int fd = open(name, O_RDONLY);
+    ASSERT(fd >= 0);
+    return fd;
+}
 //----------------------------------------------------------------------
 // OpenForReadWrite
 // 	Open a file for reading or writing.

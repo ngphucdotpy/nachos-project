@@ -262,12 +262,50 @@ void ExceptionHandler(ExceptionType which)
 					delete kernel->fileSystem->fileDes[id];
 					kernel->fileSystem->fileDes[id] = NULL;
 					kernel->machine->WriteRegister(2, 0);
-					DEBUG(dbgSys, "Dong file so " << id << " thanh cong " << "\n");
+					DEBUG(dbgSys, "Dong file so " << id << " thanh cong" << "\n");
+					DEBUG(dbgSys, "Tang bien PC " << "\n");
+					increasePC();
+					break;
 				}
 			}
+			
 			kernel->machine->WriteRegister(2, -1);
 			increasePC();
 			DEBUG(dbgSys, "Tang bien PC " << "\n");
+			break;
+		}
+
+		case SC_Remove:
+		{
+			int virtAddr = kernel->machine->ReadRegister(4);
+			char *filename;
+			filename = User2System(virtAddr, MaxFileLength);
+			if (filename == NULL)
+			{
+				printf("\n Not enough memory in system");
+				DEBUG(dbgSys, "\n Not enough memory in system");
+				kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương
+				// trình người dùng
+				delete filename;
+				return;
+			}
+			DEBUG(dbgSys, "\nFinish reading filename.");
+			if (!kernel->fileSystem->Remove(filename))
+			{
+				printf("\n Error remove file '%s'", filename);
+				DEBUG(dbgSys, "\n Error:Cannot remove file.");
+				kernel->machine->WriteRegister(2, -1);
+				increasePC();
+				delete filename;
+				return;
+			}
+			DEBUG(dbgSys, "Xoa file thanh cong. " << "\n");
+			kernel->machine->WriteRegister(2, 0);
+
+			DEBUG(dbgSys, "Tang bien PC " << "\n");
+			increasePC();
+			return;
+			ASSERTNOTREACHED();
 			break;
 		}
 

@@ -52,10 +52,10 @@ public:
 		{
 			fileDes[i] = NULL;
 		}
-		this->Create("stdin", 0);
-		this->Create("stdout", 0);
-		fileDes[0] = this->Open("stdin", 2);
-		fileDes[1] = this->Open("stdout", 3);
+		this->Create((char *)"stdin", 0);
+		this->Create((char *)"stdout", 0);
+		fileDes[0] = this->Open((char *)"stdin", 2);
+		fileDes[1] = this->Open((char *)"stdout", 3);
 	}
 	FileSystem(bool format)
 	{
@@ -65,10 +65,10 @@ public:
 		{
 			fileDes[i] = NULL;
 		}
-		this->Create("stdin", 0);
-		this->Create("stdout", 0);
-		fileDes[0] = this->Open("stdin", 2);
-		fileDes[1] = this->Open("stdout", 3);
+		this->Create((char*)"stdin", 0);
+		this->Create((char *) "stdout", 0);
+		fileDes[0] = this->Open((char *)"stdin", 2);
+		fileDes[1] = this->Open((char *)"stdout", 3);
 	}
 	~FileSystem()
 	{
@@ -108,8 +108,13 @@ public:
 
 	OpenFile *Open(char *name, int type)
 	{
-		int fileDescriptor = OpenForReadWrite(name, FALSE);
-
+		int fileDescriptor;
+		if (type==0) {
+			fileDescriptor = OpenForRead(name);
+		}
+		else {
+			fileDescriptor = OpenForReadWrite(name, FALSE);
+		}
 		if (fileDescriptor == -1)
 			return NULL;
 		

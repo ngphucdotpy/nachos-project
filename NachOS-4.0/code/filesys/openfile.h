@@ -76,7 +76,8 @@ class OpenFile {
 
     OpenFile(int sector);		// Open a file whose header is located
 					// at "sector" on the disk
-	OpenFile(int f, int t);
+	// OpenFile(int f, int t);
+	OpenFile(int sector, int type);
 
     ~OpenFile();			// Close the file
 
