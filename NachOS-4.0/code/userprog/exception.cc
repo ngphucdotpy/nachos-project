@@ -57,6 +57,8 @@ void increasePC()
 
 	/* set next programm counter for brach execution */
 	kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+
+
 }
 
 // Input: - User space address (int)
@@ -198,14 +200,71 @@ void ExceptionHandler(ExceptionType which)
 			break;
 		}
 
+		case SC_Open:
+		{
+			DEBUG(dbgSys, "Vao case SC_Open: " << "\n");
+			int virtAddr = kernel->machine->ReadRegister(4);
+			int type = kernel->machine->ReadRegister(5);
+			char *filename;
+			filename = User2System(virtAddr, MaxFileLength);
+			int freeSlot = kernel->fileSystem->FindFreeSlot();
+			if (freeSlot != -1)
+			{
+				if (type == 0 || type == 1)
+				{ // 0: read and write 	1: read only
+					if ((kernel->fileSystem->fileDes[freeSlot] = kernel->fileSystem->Open(filename, type)) != NULL)
+					{
+						DEBUG(dbgSys, "Mo File Thanh Cong. FileID: " << freeSlot << "\n");
+						kernel->machine->WriteRegister(2, freeSlot);
+					}
+				}
+				else if (type == 2)
+				{
+					kernel->machine->WriteRegister(2, 0); // Vi tri ID 0 stdin
+				}
+				else if (type==3)
+				{
+					kernel->machine->WriteRegister(2, 1); // Vi tri ID 1 stdout
+				}
+				else {
+					// Neu khong mo duoc file
+					kernel->machine->WriteRegister(2, -1);
+				}
+				increasePC();
+				DEBUG(dbgSys, "Tang bien PC " << "\n");
+			}
+			delete[] filename;
+			break;
+		}
+		case SC_Close:
+		{
+			//Doc id cua file(OpenFileID)
+			int id = kernel->machine->ReadRegister(4);
+			if (id >= 0 && id <= 19) 
+			{
+				if (kernel->fileSystem->fileDes[id]) //neu co mo file
+				{
+					delete kernel->fileSystem->fileDes[id];
+					kernel->fileSystem->fileDes[id] = NULL;
+					kernel->machine->WriteRegister(2, 0);
+					DEBUG(dbgSys, "Dong file so " << id << " thanh cong " << "\n");
+				}
+			}
+			kernel->machine->WriteRegister(2, -1);
+			increasePC();
+			DEBUG(dbgSys, "Tang bien PC " << "\n");
+			break;
+		}
+
 		// network
-		case SC_SocketTCP: {
+		case SC_SocketTCP:
+		{
 			int fd = OpenSocket();
 			if (fd != -1)
 				kernel->machine->WriteRegister(2, fd);
 			else
 				kernel->machine->WriteRegister(2, -1);
-			
+
 			increasePC();
 
 			return;
@@ -213,7 +272,8 @@ void ExceptionHandler(ExceptionType which)
 			break;
 		}
 
-		case SC_Connect: {
+		case SC_Connect:
+		{
 			int socket_id = kernel->machine->ReadRegister(4);
 			int virtAddr = kernel->machine->ReadRegister(5);
 			int port = kernel->machine->ReadRegister(6);
@@ -223,7 +283,7 @@ void ExceptionHandler(ExceptionType which)
 			result = ConnectToSocket(socket_id, ip, port);
 
 			kernel->machine->WriteRegister(2, result);
-			
+
 			increasePC();
 			delete ip;
 
@@ -232,18 +292,19 @@ void ExceptionHandler(ExceptionType which)
 			break;
 		}
 
-		case SC_Send: {
+		case SC_Send:
+		{
 			int socket_id = kernel->machine->ReadRegister(4);
 			int virtAddr = kernel->machine->ReadRegister(5);
 			int len = kernel->machine->ReadRegister(6);
-			
+
 			char *buffer = User2System(virtAddr, len + 1);
 
 			char sockName[32];
 			sprintf(sockName, "SOCKET_%d", kernel->hostName);
 			result = SendToSocket(socket_id, buffer, len, sockName);
 			kernel->machine->WriteRegister(2, result);
-			
+
 			increasePC();
 			delete buffer;
 
@@ -252,11 +313,12 @@ void ExceptionHandler(ExceptionType which)
 			break;
 		}
 
-		case SC_Receive: {
+		case SC_Receive:
+		{
 			int socket_id = kernel->machine->ReadRegister(4);
 			int virtAddr = kernel->machine->ReadRegister(5);
 			int len = kernel->machine->ReadRegister(6);
-			
+
 			char *buffer = new char[len + 1];
 			result = ReadFromSocket(socket_id, buffer, len);
 			System2User(virtAddr, len, buffer);
@@ -269,7 +331,8 @@ void ExceptionHandler(ExceptionType which)
 			break;
 		}
 
-		case SC_Close_soc: {
+		case SC_Close_soc:
+		{
 			int fd = kernel->machine->ReadRegister(4);
 
 			if (fd != -1)
@@ -294,5 +357,4 @@ void ExceptionHandler(ExceptionType which)
 		cerr << "Unexpected user mode exception" << (int)which << "\n";
 		break;
 	}
-	ASSERTNOTREACHED();
 }
