@@ -388,6 +388,12 @@ void ExceptionHandler(ExceptionType which)
 			}
 			// truong hop Read file binh thuong
 			int OldPosition = kernel->fileSystem->fileDes[id]->GetPosition();
+			//Lam rong buffer
+			for (int i = 0; i < size; i++)
+				{
+					buffer[i] = 0;
+				}
+			
 			if (kernel->fileSystem->fileDes[id]->Read(buffer, size) > 0)
 			{
 				int NewPosition = kernel->fileSystem->fileDes[id]->GetPosition();
@@ -405,6 +411,7 @@ void ExceptionHandler(ExceptionType which)
 			}
 			increasePC();
 			DEBUG(dbgSys, "Tang bien PC "<< "\n");
+				delete buffer;
 			return;
 			ASSERTNOTREACHED();
 			break;
