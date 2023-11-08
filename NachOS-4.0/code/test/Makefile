@@ -112,7 +112,7 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = add halt shell matmult sort segments createfile echoclient fileclient openfile readfile remove
+PROGRAMS = add halt shell matmult sort segments createfile echoclient fileclient openfile readfile
 endif
 
 all: $(PROGRAMS)
