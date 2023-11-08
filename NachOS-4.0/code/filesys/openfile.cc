@@ -41,6 +41,14 @@ OpenFile::OpenFile(int sector, int t)
     type = t;
 }
 
+OpenFile::OpenFile(int sector, int t, char* name)
+{ 
+    hdr = new FileHeader;
+    hdr->FetchFrom(sector);
+    seekPosition = 0;
+    type = t;
+    strcpy(filename,name);
+}
 //----------------------------------------------------------------------
 // OpenFile::~OpenFile
 // 	Close a Nachos file, de-allocating any in-memory data structures.

@@ -6,9 +6,8 @@ int main()
     int len;
     char filename[maxlen];
     /*Create a file*/
-    // Create("Hello.txt");
-    int fileid = Open("Hello.txt",2);
-    Close(fileid);
+    int temp = Create("Hello.txt");
+    int fileid = Open("Hello.txt",1);
     Remove("Hello.txt");
     Halt();
 }

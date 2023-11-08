@@ -176,6 +176,7 @@ void ExceptionHandler(ExceptionType which)
 				DEBUG(dbgSys, "\n Not enough memory in system");
 				kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương
 				// trình người dùng
+				increasePC();
 				delete filename;
 				return;
 			}
@@ -300,9 +301,19 @@ void ExceptionHandler(ExceptionType which)
 				DEBUG(dbgSys, "\n Not enough memory in system");
 				kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương
 				// trình người dùng
+				increasePC();
 				delete filename;
 				return;
 			}
+			for (int i =0 ;i<20;i++) {
+				if (kernel->fileSystem->fileDes[i] != NULL && strcmp(kernel->fileSystem->fileDes[i]->filename,filename)==0) {
+					DEBUG(dbgSys,"\n Error: File is opening. Cannot remove file.");
+					kernel->machine->WriteRegister(2, -1);
+					increasePC();
+					delete filename;
+					return;
+				}
+			} 
 			DEBUG(dbgSys, "\nFinish reading filename.");
 			if (!kernel->fileSystem->Remove(filename))
 			{
