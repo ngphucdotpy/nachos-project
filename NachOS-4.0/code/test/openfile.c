@@ -9,6 +9,6 @@ int main()
     // Create("Hello.txt");
     int fileid = Open("Hello.txt",2);
     Close(fileid);
-    Open("notfound.txt",0);
+    Remove("Hello.txt");
     Halt();
 }

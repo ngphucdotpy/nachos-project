@@ -25,6 +25,11 @@
 #include "main.h"
 #include "syscall.h"
 #include "ksyscall.h"
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 //----------------------------------------------------------------------
 // ExceptionHandler
 // 	Entry point into the Nachos kernel.  Called when a user program
@@ -253,14 +258,13 @@ void ExceptionHandler(ExceptionType which)
 							  << "\n");
 			increasePC();
 			delete[] filename;
+
 			return;
 			ASSERTNOTREACHED();
 			break;
 		}
 		case SC_Close:
 		{
-			DEBUG(dbgSys, "Vao case SC_Close. ");
-
 			// Doc id cua file(OpenFileID)
 			int id = kernel->machine->ReadRegister(4);
 			if (id >= 0 && id <= 19)
@@ -277,7 +281,46 @@ void ExceptionHandler(ExceptionType which)
 			kernel->machine->WriteRegister(2, -1);
 			increasePC();
 			DEBUG(dbgSys, "Tang bien PC "
+							 
 							  << "\n");
+
+			return;
+			ASSERTNOTREACHED();
+			break;
+		}
+
+		case SC_Remove:
+		{
+			int virtAddr = kernel->machine->ReadRegister(4);
+			char *filename;
+			filename = User2System(virtAddr, MaxFileLength);
+			if (filename == NULL)
+			{
+				printf("\n Not enough memory in system");
+				DEBUG(dbgSys, "\n Not enough memory in system");
+				kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương
+				// trình người dùng
+				delete filename;
+				return;
+			}
+			DEBUG(dbgSys, "\nFinish reading filename.");
+			if (!kernel->fileSystem->Remove(filename))
+			{
+				printf("\n Error remove file '%s'", filename);
+				DEBUG(dbgSys, "\n Error:Cannot remove file.");
+				kernel->machine->WriteRegister(2, -1);
+				increasePC();
+				delete filename;
+				return;
+			}
+			DEBUG(dbgSys, "Xoa file thanh cong. "
+							  << "\n");
+			kernel->machine->WriteRegister(2, 0);
+
+			DEBUG(dbgSys, "Tang bien PC "
+							  << "\n");
+			increasePC();
+
 			return;
 			ASSERTNOTREACHED();
 			break;
@@ -471,16 +514,17 @@ void ExceptionHandler(ExceptionType which)
 		// network
 		case SC_SocketTCP:
 		{
-			int sid = OpenSocket();
-			if (sid != -1)
+			int sid = socket(AF_INET, SOCK_STREAM, 0);
+			if (sid < 0)
 			{
-				DEBUG(dbgSys, "Socked created. SocID: " << sid << "\n");
-				kernel->machine->WriteRegister(2, sid);
+
+				DEBUG(dbgSys, "Failed to create socket." << sid << "\n");
+				kernel->machine->WriteRegister(2, -1);
 			}
 			else
 			{
-				DEBUG(dbgSys, "Failed. SocID: " << sid << "\n");
-				kernel->machine->WriteRegister(2, -1);
+				DEBUG(dbgSys, "Socked created. Socet ID: " << sid << "\n");
+				kernel->machine->WriteRegister(2, sid);
 			}
 
 			increasePC();
@@ -498,7 +542,23 @@ void ExceptionHandler(ExceptionType which)
 
 			char *ip = User2System(virtAddr, 16);
 
-			result = ConnectToSocket(socket_id, ip, port);
+			int result = -1;
+			struct sockaddr_in svr_addr;
+			bzero(&svr_addr, sizeof(svr_addr));
+			svr_addr.sin_family = AF_INET;
+			svr_addr.sin_addr.s_addr = inet_addr(ip);
+			svr_addr.sin_port = htons(port);
+
+			if (connect(socket_id, (struct sockaddr *)&svr_addr, sizeof(svr_addr)) < 0)
+			{
+				DEBUG(dbgSys, "Failed to connect.\n")
+				result = -1;
+			}
+			else
+			{
+				DEBUG(dbgSys, "Connected.\n");
+				result = 0;
+			}
 
 			kernel->machine->WriteRegister(2, result);
 
@@ -516,12 +576,32 @@ void ExceptionHandler(ExceptionType which)
 			int virtAddr = kernel->machine->ReadRegister(5);
 			int len = kernel->machine->ReadRegister(6);
 
-			char *buffer = User2System(virtAddr, len + 1);
+			char *buffer = User2System(virtAddr, len);
+			// if (buffer == NULL)
+			// {
+			// 	DEBUG(dbgSys, "Not enough memory in system.\n");
+			// 	kernel->machine->WriteRegister(2, -1);
+			// 	delete buffer;
+			// 	increasePC();
+			// 	return;
+			// }
+			int result = send(socket_id, buffer, len, 0);
 
-			char sockName[32];
-			sprintf(sockName, "SOCKET_%d", kernel->hostName);
-			result = SendToSocket(socket_id, buffer, len, sockName);
-			kernel->machine->WriteRegister(2, result);
+			if (result < 0)
+			{
+				DEBUG(dbgSys, "Failed to send buffer.\n");
+				kernel->machine->WriteRegister(2, -1);
+			}
+			else if (result < len)
+			{
+				DEBUG(dbgSys, "Connection closed.\n");
+				kernel->machine->WriteRegister(2, 0);
+			}
+			else
+			{
+				DEBUG(dbgSys, "Sent: " << buffer << "\n");
+				kernel->machine->WriteRegister(2, result);
+			}
 
 			increasePC();
 			delete buffer;
@@ -537,10 +617,27 @@ void ExceptionHandler(ExceptionType which)
 			int virtAddr = kernel->machine->ReadRegister(5);
 			int len = kernel->machine->ReadRegister(6);
 
-			char *buffer = new char[len + 1];
-			result = ReadFromSocket(socket_id, buffer, len);
-			System2User(virtAddr, len, buffer);
-			kernel->machine->WriteRegister(2, result);
+			char buffer[128]; // = new char[len + 1];
+
+			int result = recv(socket_id, buffer, len, 0);
+
+			if (result < 0)
+			{
+				DEBUG(dbgSys, "Failed to receive buffer.\n");
+				kernel->machine->WriteRegister(2, -1);
+			}
+			else if (result < len)
+			{
+				DEBUG(dbgSys, "Connection closed. Received: " << buffer << "\n");
+				kernel->machine->WriteRegister(2, 0);
+				System2User(virtAddr, len, buffer);
+			}
+			else
+			{
+				DEBUG(dbgSys, "Received: " << buffer << "\n");
+				kernel->machine->WriteRegister(2, result);
+				System2User(virtAddr, len, buffer);
+			}
 
 			increasePC();
 
@@ -549,16 +646,23 @@ void ExceptionHandler(ExceptionType which)
 			break;
 		}
 
-		case SC_Close_soc:
+		case SC_Close_:
 		{
-			int fd = kernel->machine->ReadRegister(4);
+			int sid = kernel->machine->ReadRegister(4);
 
-			if (fd != -1)
-				kernel->machine->WriteRegister(2, 0);
-			else
+			int result = close(sid);
+
+			if (result < 0)
+			{
+				DEBUG(dbgSys, "Failed to close. SocID: " << sid << "\n");
 				kernel->machine->WriteRegister(2, -1);
+			}
+			else
+			{
+				DEBUG(dbgSys, "Socked closed. SocID: " << sid << "\n");
+				kernel->machine->WriteRegister(2, 0);
+			}
 
-			CloseSocket(fd);
 			increasePC();
 
 			return;

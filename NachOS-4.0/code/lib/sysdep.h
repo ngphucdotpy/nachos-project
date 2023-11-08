@@ -44,6 +44,7 @@ extern bool PollFile(int fd);
 // File operations: open/read/write/lseek/close, and check for error
 // For simulating the disk and the console devices.
 extern int OpenForWrite(char *name);
+int OpenForRead(char *name);
 extern int OpenForReadWrite(char *name, bool crashOnError);
 extern void Read(int fd, char *buffer, int nBytes);
 extern int ReadPartial(int fd, char *buffer, int nBytes);
@@ -69,10 +70,7 @@ extern void CloseSocket(int sockID);
 extern void AssignNameToSocket(char *socketName, int sockID);
 extern void DeAssignNameToSocket(char *socketName);
 extern bool PollSocket(int sockID);
-extern int ReadFromSocket(int sockID, char *buffer, int packetSize);
-extern int SendToSocket(int sockID, char *buffer, int packetSize,char *toName);
-
-// user define
-extern int ConnectToSocket(int socketid, char *ip, int port);
+extern void ReadFromSocket(int sockID, char *buffer, int packetSize);
+extern void SendToSocket(int sockID, char *buffer, int packetSize,char *toName);
 
 #endif // SYSDEP_H
