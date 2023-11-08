@@ -194,6 +194,12 @@ Kernel::GetChar() {
     char ch=synchConsoleIn->GetChar();
     return ch;
 }
+
+void 
+Kernel ::PushChar(char ch)
+{
+    synchConsoleOut->PutChar(ch);
+}
 //----------------------------------------------------------------------
 // Kernel::NetworkTest
 //      Test whether the post office is working. On machines #0 and #1, do:
