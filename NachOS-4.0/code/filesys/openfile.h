@@ -50,6 +50,12 @@ public:
 
 	~OpenFile() { Close(file); } // close the file
 
+	int Seek(int pos)
+	{
+		Lseek(file, pos, 0);
+		currentOffset = Tell(file);
+		return currentOffset;
+	}
 	int ReadAt(char *into, int numBytes, int position)
 	{
 		Lseek(file, position, 0);
@@ -73,11 +79,21 @@ public:
 		currentOffset += numWritten;
 		return numWritten;
 	}
-
+	// Default Length()
+	/*
 	int Length()
 	{
 		Lseek(file, 0, 2);
 		return Tell(file);
+	}
+	*/
+	int Length()
+	{
+		int len;
+		Lseek(file, 0, 2);
+		len=Tell(file);
+		Lseek(file,currentOffset,0);
+		return len;
 	}
 	int GetPosition()
 	{
@@ -98,8 +114,8 @@ class OpenFile
 public:
 	int type;
 
-  OpenFile(int sector);		// Open a file whose header is located
-					// at "sector" on the disk
+	OpenFile(int sector); // Open a file whose header is located
+						  // at "sector" on the disk
 	// OpenFile(int f, int t);
 	OpenFile(int sector, int type);
 

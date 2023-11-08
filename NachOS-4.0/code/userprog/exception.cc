@@ -533,7 +533,7 @@ void ExceptionHandler(ExceptionType which)
 			// Write Console
 			if (kernel->fileSystem->fileDes[id]->type == 3)
 			{
-				
+
 				int i = 0;
 				while (buffer[i] != 0 && buffer[i] != '\n')
 				{
@@ -563,20 +563,53 @@ void ExceptionHandler(ExceptionType which)
 			// Doc id cua file(OpenFileID)
 			// int id = kernel->machine->ReadRegister(4);
 			DEBUG(dbgSys, "Vao case SC_Seek. \n");
-			DEBUG(dbgSys, "Seek file thanh cong\n");
+			int position = kernel->machine->ReadRegister(4);
+			int id = kernel->machine->ReadRegister(5);
+			if (id < 0 || id > 19)
+			{
+				printf("Khong the Seek file.\n");
+				DEBUG(dbgSys, "Khong the Seek file do id file khong thuoc file descriptor table.\n");
+				kernel->machine->WriteRegister(2, -1);
+				increasePC();
 
-			// if (id >= 0 && id <= 19)
-			// {
-			// 	if (kernel->fileSystem->fileDes[id]) // neu co mo file
-			// 	{
-			// 		delete kernel->fileSystem->fileDes[id];
-			// 		kernel->fileSystem->fileDes[id] = NULL;
-			// 		kernel->machine->WriteRegister(2, 0);
-			// 		DEBUG(dbgSys, "Dong file so " << id << " thanh cong "
-			// 									  << "\n");
-			// 	}
-			// }
-			kernel->machine->WriteRegister(2, -1);
+				return;
+			}
+			if (kernel->fileSystem->fileDes[id] == NULL)
+			{
+				printf("Khong the Seek file khong ton tai.\n");
+				DEBUG(dbgSys, "Khong the Seek file KHONG ton tai.\n");
+				kernel->machine->WriteRegister(2, -1);
+				increasePC();
+
+				return;
+			}
+			if (id == 0 || id == 1)
+			{
+				printf("Khong the Seek trong Console input.\n");
+				DEBUG(dbgSys, "Khong the Seek  Console .\n");
+				kernel->machine->WriteRegister(2, -1);
+				increasePC();
+				return;
+			}
+			// Xac dinh vi tri toi da cua file
+			int len = kernel->fileSystem->fileDes[id]->Length();
+			// Xac dinh vi tri muon seek den
+
+			position = (position == -1) ? len : position;
+			// Xac dinh vi tri position co hop le hay khong?
+			if (position > len || position < 0)
+			{
+				printf("\n Khong the seek den vi tri nay \n");
+				kernel->machine->WriteRegister(2, -1);
+				
+			}
+			else
+			{
+				kernel->fileSystem->fileDes[id]->Seek(position);
+				DEBUG(dbgSys, "Seek file thanh cong\n");
+				DEBUG(dbgSys, "Vi tri Seek den: "<<position<<"\n");
+				kernel->machine->WriteRegister(2, position);
+			}
 			increasePC();
 			DEBUG(dbgSys, "Tang bien PC "
 							  << "\n");
