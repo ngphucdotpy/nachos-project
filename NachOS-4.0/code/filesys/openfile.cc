@@ -200,5 +200,4 @@ OpenFile::Length()
 { 
     return hdr->FileLength(); 
 }
-
 #endif //FILESYS_STUB

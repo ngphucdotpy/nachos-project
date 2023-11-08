@@ -18,6 +18,7 @@
 #include "alarm.h"
 #include "filesys.h"
 #include "machine.h"
+// #include "synchconsole.h"
 
 class PostOfficeInput;
 class PostOfficeOutput;
@@ -40,6 +41,8 @@ class Kernel {
     void ConsoleTest();         // interactive console self test
 
     void NetworkTest();         // interactive 2-machine network test
+
+    char GetChar();      // get char of SynchConsoleInput;
     
 // These are public for notational convenience; really, 
 // they're global variables used everywhere.
@@ -50,7 +53,7 @@ class Kernel {
     Statistics *stats;		// performance metrics
     Alarm *alarm;		// the software alarm clock    
     Machine *machine;           // the simulated CPU
-    SynchConsoleInput *synchConsoleIn;
+    SynchConsoleInput *synchConsoleIn ;
     SynchConsoleOutput *synchConsoleOut;
     SynchDisk *synchDisk;
     FileSystem *fileSystem;     

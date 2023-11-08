@@ -14,8 +14,6 @@
 #include "kernel.h"
 
 
-
-
 void SysHalt()
 {
   kernel->interrupt->Halt();

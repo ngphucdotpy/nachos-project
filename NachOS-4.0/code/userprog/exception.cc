@@ -282,6 +282,7 @@ void ExceptionHandler(ExceptionType which)
 			kernel->machine->WriteRegister(2, -1);
 			increasePC();
 			DEBUG(dbgSys, "Tang bien PC "
+							 
 							  << "\n");
 
 			return;
@@ -320,6 +321,193 @@ void ExceptionHandler(ExceptionType which)
 			DEBUG(dbgSys, "Tang bien PC "
 							  << "\n");
 			increasePC();
+			return;
+			ASSERTNOTREACHED();
+			return;
+			ASSERTNOTREACHED();
+			break;
+		}
+		case SC_Read:
+		{
+			// Doc id cua file(OpenFileID)
+			// int id = kernel->machine->ReadRegister(4);
+			DEBUG(dbgSys, "Vao case SC_Read. ");
+			int virtAddr = kernel->machine->ReadRegister(4);
+			int size = kernel->machine->ReadRegister(5);
+			int id = kernel->machine->ReadRegister(6);
+			char *buffer;
+			buffer = User2System(virtAddr, size);
+			OpenFile *fileopen = kernel->fileSystem->fileDes[id];
+			DEBUG(dbgSys, "Read file " << buffer << ". Size: " << size << ", ID:" << id << ", Type:" << fileopen->type << "\n");
+
+			if (id < 0 || id > 19)
+			{
+				printf("Khong the mo file.\n");
+				DEBUG(dbgSys, "Khong the read file do id file khong thuoc file descriptor table.\n");
+				kernel->machine->WriteRegister(2, -1);
+				increasePC();
+
+				return;
+			}
+			if (kernel->fileSystem->fileDes[id] == NULL)
+			{
+				printf("Khong the mo file khong ton tai.\n");
+				DEBUG(dbgSys, "Khong the read file KHONG ton tai.\n");
+				kernel->machine->WriteRegister(2, -1);
+				increasePC();
+
+				return;
+			}
+			if (kernel->fileSystem->fileDes[id]->type == 3)
+			{
+				printf("Khong the mo file Console output.\n");
+				DEBUG(dbgSys, "Khong the read file Console output..\n");
+				kernel->machine->WriteRegister(2, -1);
+				increasePC();
+
+				return;
+			}
+
+			char ch;
+			
+			// Read file bang stdin
+			if (kernel->fileSystem->fileDes[id]->type == 2)
+			{
+				printf("Read file Console input.\n");
+				DEBUG(dbgSys, "Read file Console input.\n");
+				// Convert data in buffer to 0
+				for (int i = 0; i < size; i++)
+				{
+					buffer[i] = 0;
+				}
+
+				// Use class SynchConsoleInput to get data from console
+				int loop = 0;
+				// char *filename = NULL;
+				// kernel->synchConsoleIn;
+				// SynchConsoleInput* conslInput = new SynchConsoleInput(NULL);
+					DEBUG(dbgSys, "Vao Loop-----------------------------------------\n");
+					DEBUG(dbgSys, "Nhap Buffer: ");
+				while (loop < size)
+				{
+					// Create class SynchConsoleInput
+
+					do
+					{						
+						ch = kernel->GetChar();
+						
+					} while (ch == EOF);
+
+					if ((ch == '\012') || (ch == '\001'))
+					{
+						break;
+					}
+					else
+					{
+						buffer[loop] = ch;
+						++loop;
+					}
+					
+				}
+					DEBUG(dbgSys, "Buffer: "<<buffer<<"\n");
+
+					DEBUG(dbgSys, "Xong Loop-----------------------------------------\n");
+
+				int size_buff = 0;
+				if (ch == '\001')
+				{
+					size_buff = -1;
+				}
+				else
+				{
+					size_buff = loop;
+				}
+				DEBUG(dbgSys, " Byte read: "<<size_buff<<"\n");
+				System2User(virtAddr, size_buff, buffer);
+
+				kernel->machine->WriteRegister(2, size_buff);
+				delete buffer;
+				DEBUG(dbgSys, "Read file thanh cong\n");
+				increasePC();
+				return;
+			}
+			// truong hop Read file binh thuong
+			int OldPosition = kernel->fileSystem->fileDes[id]->GetPosition();
+			//Lam rong buffer
+			for (int i = 0; i < size; i++)
+				{
+					buffer[i] = 0;
+				}
+			
+			if (kernel->fileSystem->fileDes[id]->Read(buffer, size) > 0)
+			{
+				int NewPosition = kernel->fileSystem->fileDes[id]->GetPosition();
+				
+				
+				System2User(virtAddr, NewPosition - OldPosition, buffer);
+				kernel->machine->WriteRegister(2, NewPosition - OldPosition);
+
+				DEBUG(dbgSys, "Read file thanh cong, So byte: "<<NewPosition - OldPosition<<", Buffer: "<<buffer<<"\n");
+			}
+			else
+			{
+				DEBUG(dbgSys, "Read file Rong\n");
+				kernel->machine->WriteRegister(2, -1);
+			}
+			increasePC();
+			DEBUG(dbgSys, "Tang bien PC "<< "\n");
+				delete buffer;
+			return;
+			ASSERTNOTREACHED();
+			break;
+		}
+		case SC_Write:
+		{
+			// Doc id cua file(OpenFileID)
+			// int id = kernel->machine->ReadRegister(4);
+			DEBUG(dbgSys, "Vao case SC_Write. ");
+			DEBUG(dbgSys, "Write file thanh cong\n");
+			// if (id >= 0 && id <= 19)
+			// {
+			// 	if (kernel->fileSystem->fileDes[id]) // neu co mo file
+			// 	{
+			// 		delete kernel->fileSystem->fileDes[id];
+			// 		kernel->fileSystem->fileDes[id] = NULL;
+			// 		kernel->machine->WriteRegister(2, 0);
+			// 		DEBUG(dbgSys, "Dong file so " << id << " thanh cong "
+			// 									  << "\n");
+			// 	}
+			// }
+			kernel->machine->WriteRegister(2, -1);
+			increasePC();
+			DEBUG(dbgSys, "Tang bien PC "
+							  << "\n");
+			return;
+			ASSERTNOTREACHED();
+			break;
+		}
+		case SC_Seek:
+		{
+			// Doc id cua file(OpenFileID)
+			// int id = kernel->machine->ReadRegister(4);
+			DEBUG(dbgSys, "Vao case SC_Seek. \n");
+			DEBUG(dbgSys, "Seek file thanh cong\n");
+
+			// if (id >= 0 && id <= 19)
+			// {
+			// 	if (kernel->fileSystem->fileDes[id]) // neu co mo file
+			// 	{
+			// 		delete kernel->fileSystem->fileDes[id];
+			// 		kernel->fileSystem->fileDes[id] = NULL;
+			// 		kernel->machine->WriteRegister(2, 0);
+			// 		DEBUG(dbgSys, "Dong file so " << id << " thanh cong "
+			// 									  << "\n");
+			// 	}
+			// }
+			kernel->machine->WriteRegister(2, -1);
+			increasePC();
+			DEBUG(dbgSys, "Tang bien PC "
+							  << "\n");
 			return;
 			ASSERTNOTREACHED();
 			break;
