@@ -147,13 +147,6 @@ openfile: openfile.o start.o
 	$(LD) $(LDFLAGS) start.o openfile.o -o openfile.coff
 	$(COFF2NOFF) openfile.coff openfile
 
-remove.o: remove.c
-	$(CC) $(CFLAGS) -c remove.c
-
-remove: remove.o start.o
-	$(LD) $(LDFLAGS) start.o remove.o -o remove.coff
-	$(COFF2NOFF) remove.coff remove
-
 readfile.o: readfile.c
 	$(CC) $(CFLAGS) -c readfile.c
 

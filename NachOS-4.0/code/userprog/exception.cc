@@ -523,7 +523,7 @@ void ExceptionHandler(ExceptionType which)
 			}
 			else
 			{
-				DEBUG(dbgSys, "Socked created. Socet ID: " << sid << "\n");
+				DEBUG(dbgSys, "Socked created. Socket ID: " << sid << "\n");
 				kernel->machine->WriteRegister(2, sid);
 			}
 
@@ -617,7 +617,7 @@ void ExceptionHandler(ExceptionType which)
 			int virtAddr = kernel->machine->ReadRegister(5);
 			int len = kernel->machine->ReadRegister(6);
 
-			char buffer[128]; // = new char[len + 1];
+			char buffer[128] = {'\0'}; // = new char[len + 1];
 
 			int result = recv(socket_id, buffer, len, 0);
 
