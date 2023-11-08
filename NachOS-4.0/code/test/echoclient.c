@@ -1,23 +1,35 @@
 #include "syscall.h"
+#define MAXLENGTH 128
 
-int fileDescriptor[20];
+int strlen(const char *str)
+{
+    const char *s;
+    for (s = str; *s; ++s)
+        ;
+    return (s - str);
+}
 
 int main()
 {
     int sid = SocketTCP();
     char ip[] = "127.0.0.1";
     int port = 1234;
-    char buffer[] = "teeepppp";
-    int len = 8; //strlen(buffer);
 
-    int cn = Connect(sid, ip, port);
-    if (cn == 0)
+    char buffer[] = "never gonna give you up.";
+    char buffer2[MAXLENGTH];
+    int len = strlen(buffer);
+
+    if (sid == -1)
     {
-        Send(sid, buffer, len);
+        return;
     }
-    // char *bu2;
-    // Receive(sid, bu2, len);
-    
+
+    if (Connect(sid, ip, port) == 0)
+    {
+        Send(sid, buffer, len + 1);
+        Receive(sid, buffer2, len + 1);
+    }
+
     Close_(sid);
 
     Halt();

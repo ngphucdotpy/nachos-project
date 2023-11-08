@@ -278,7 +278,7 @@ void ExceptionHandler(ExceptionType which)
 												  << "\n");
 				}
 			}
-			
+
 			kernel->machine->WriteRegister(2, -1);
 			increasePC();
 			DEBUG(dbgSys, "Tang bien PC "
@@ -313,10 +313,12 @@ void ExceptionHandler(ExceptionType which)
 				delete filename;
 				return;
 			}
-			DEBUG(dbgSys, "Xoa file thanh cong. " << "\n");
+			DEBUG(dbgSys, "Xoa file thanh cong. "
+							  << "\n");
 			kernel->machine->WriteRegister(2, 0);
 
-			DEBUG(dbgSys, "Tang bien PC " << "\n");
+			DEBUG(dbgSys, "Tang bien PC "
+							  << "\n");
 			increasePC();
 			return;
 			ASSERTNOTREACHED();
@@ -327,15 +329,16 @@ void ExceptionHandler(ExceptionType which)
 		case SC_SocketTCP:
 		{
 			int sid = socket(AF_INET, SOCK_STREAM, 0);
-			if (sid != -1)
+			if (sid == -1)
 			{
-				DEBUG(dbgSys, "Socked created. SocID: " << sid << "\n");
-				kernel->machine->WriteRegister(2, sid);
+
+				DEBUG(dbgSys, "Failed to create socket." << sid << "\n");
+				kernel->machine->WriteRegister(2, -1);
 			}
 			else
 			{
-				DEBUG(dbgSys, "Failed. SocID: " << sid << "\n");
-				kernel->machine->WriteRegister(2, -1);
+				DEBUG(dbgSys, "Socked created. Socet ID: " << sid << "\n");
+				kernel->machine->WriteRegister(2, sid);
 			}
 
 			increasePC();
@@ -353,24 +356,25 @@ void ExceptionHandler(ExceptionType which)
 
 			char *ip = User2System(virtAddr, 16);
 
-			int result = 0;
-
+			int result = -1;
 			struct sockaddr_in svr_addr;
 			bzero(&svr_addr, sizeof(svr_addr));
 			svr_addr.sin_family = AF_INET;
 			svr_addr.sin_addr.s_addr = inet_addr(ip);
 			svr_addr.sin_port = htons(port);
-			
-			if (connect(socket_id, (struct sockaddr *)&svr_addr, sizeof(svr_addr)) < 0)
-			    result = -1;
-			
-			kernel->machine->WriteRegister(2, result);
 
-			if (result == -1) {
-				DEBUG(dbgSys, "Failed to connect\n")
+			if (connect(socket_id, (struct sockaddr *)&svr_addr, sizeof(svr_addr)) < 0)
+			{
+				DEBUG(dbgSys, "Failed to connect.\n")
+				result = -1;
 			}
 			else
-				DEBUG(dbgSys, "Connected\n");
+			{
+				DEBUG(dbgSys, "Connected.\n");
+				result = 0;
+			}
+
+			kernel->machine->WriteRegister(2, result);
 
 			increasePC();
 			delete ip;
@@ -386,10 +390,32 @@ void ExceptionHandler(ExceptionType which)
 			int virtAddr = kernel->machine->ReadRegister(5);
 			int len = kernel->machine->ReadRegister(6);
 
-			char *buffer = User2System(virtAddr, len + 1);
+			char *buffer = User2System(virtAddr, len);
+			// if (buffer == NULL)
+			// {
+			// 	DEBUG(dbgSys, "Not enough memory in system.\n");
+			// 	kernel->machine->WriteRegister(2, -1);
+			// 	delete buffer;
+			// 	increasePC();
+			// 	return;
+			// }
+			int result = send(socket_id, buffer, len, 0);
 
-			if (send(socket_id, buffer, len, 0) == 0)
-				DEBUG(dbgSys, "Sent");
+			if (result < 0)
+			{
+				DEBUG(dbgSys, "Failed to send buffer.\n");
+				kernel->machine->WriteRegister(2, -1);
+			}
+			else if (result < len)
+			{
+				DEBUG(dbgSys, "Connection closed.\n");
+				kernel->machine->WriteRegister(2, 0);
+			}
+			else
+			{
+				DEBUG(dbgSys, "Sent: " << buffer << "\n");
+				kernel->machine->WriteRegister(2, result);
+			}
 
 			increasePC();
 			delete buffer;
@@ -405,13 +431,27 @@ void ExceptionHandler(ExceptionType which)
 			int virtAddr = kernel->machine->ReadRegister(5);
 			int len = kernel->machine->ReadRegister(6);
 
-			char *buffer = new char[len + 1];
-			read(socket_id, buffer, len);
-			// result = ReadFromSocket(socket_id, buffer, len);
-			System2User(virtAddr, len, buffer);
-			kernel->machine->WriteRegister(2, result);
+			char buffer[128]; // = new char[len + 1];
 
-			DEBUG(dbgSys, "Received: " << buffer << "\n");
+			int result = recv(socket_id, buffer, len, 0);
+
+			if (result < 0)
+			{
+				DEBUG(dbgSys, "Failed to receive buffer.\n");
+				kernel->machine->WriteRegister(2, -1);
+			}
+			else if (result < len)
+			{
+				DEBUG(dbgSys, "Connection closed. Received: " << buffer << "\n");
+				kernel->machine->WriteRegister(2, 0);
+				System2User(virtAddr, len, buffer);
+			}
+			else
+			{
+				DEBUG(dbgSys, "Received: " << buffer << "\n");
+				kernel->machine->WriteRegister(2, result);
+				System2User(virtAddr, len, buffer);
+			}
 
 			increasePC();
 
@@ -423,16 +463,19 @@ void ExceptionHandler(ExceptionType which)
 		case SC_Close_:
 		{
 			int sid = kernel->machine->ReadRegister(4);
+
 			int result = close(sid);
 
-			if (result == 0) {
-				kernel->machine->WriteRegister(2, 0);
-				DEBUG(dbgSys, "Socked closed. SocID: " << sid << "\n");
-			}
-			else {
-				kernel->machine->WriteRegister(2, -1);
+			if (result < 0)
+			{
 				DEBUG(dbgSys, "Failed to close. SocID: " << sid << "\n");
-			}				
+				kernel->machine->WriteRegister(2, -1);
+			}
+			else
+			{
+				DEBUG(dbgSys, "Socked closed. SocID: " << sid << "\n");
+				kernel->machine->WriteRegister(2, 0);
+			}
 
 			increasePC();
 
