@@ -278,7 +278,6 @@ void ExceptionHandler(ExceptionType which)
 												  << "\n");
 				}
 			}
-
 			kernel->machine->WriteRegister(2, -1);
 			increasePC();
 			DEBUG(dbgSys, "Tang bien PC "
@@ -321,8 +320,7 @@ void ExceptionHandler(ExceptionType which)
 			DEBUG(dbgSys, "Tang bien PC "
 							  << "\n");
 			increasePC();
-			return;
-			ASSERTNOTREACHED();
+
 			return;
 			ASSERTNOTREACHED();
 			break;
@@ -517,7 +515,7 @@ void ExceptionHandler(ExceptionType which)
 		case SC_SocketTCP:
 		{
 			int sid = socket(AF_INET, SOCK_STREAM, 0);
-			if (sid == -1)
+			if (sid < 0)
 			{
 
 				DEBUG(dbgSys, "Failed to create socket." << sid << "\n");

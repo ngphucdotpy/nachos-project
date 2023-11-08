@@ -98,7 +98,7 @@ class OpenFile
 public:
 	int type;
 
-    OpenFile(int sector);		// Open a file whose header is located
+  OpenFile(int sector);		// Open a file whose header is located
 					// at "sector" on the disk
 	// OpenFile(int f, int t);
 	OpenFile(int sector, int type);
