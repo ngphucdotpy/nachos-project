@@ -44,6 +44,9 @@ class Kernel {
 
     char GetChar();      // get char of SynchConsoleInput;
     
+    void PushChar(char ch);      // Push char of SynchConsoleOutput;
+
+    
 // These are public for notational convenience; really, 
 // they're global variables used everywhere.
 
