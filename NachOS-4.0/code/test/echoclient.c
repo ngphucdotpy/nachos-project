@@ -76,7 +76,7 @@ int main()
     }
 
     for (i = 0; i < 4; i++)
-        Close_(fd[i]);
+        fd[i] = Close_(fd[i]);
 
     Halt();
 }
