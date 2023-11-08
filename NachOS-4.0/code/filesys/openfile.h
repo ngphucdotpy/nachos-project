@@ -35,6 +35,7 @@ public:
 	// type 1 : read only
 	// type 2 : stdin
 	// type 3 : stdout
+	char filename[33];
 
 	OpenFile(int f)
 	{
@@ -46,6 +47,14 @@ public:
 		file = f;
 		currentOffset = 0;
 		type = t;
+	};
+
+	OpenFile(int f, int t, char* name)
+	{
+		file = f;
+		currentOffset = 0;
+		type = t;
+		strcpy(filename,name);
 	};
 
 	~OpenFile() { Close(file); } // close the file
@@ -118,6 +127,9 @@ public:
 						  // at "sector" on the disk
 	// OpenFile(int f, int t);
 	OpenFile(int sector, int type);
+
+	OpenFile(int sector, int type, char* name);
+
 
 	~OpenFile(); // Close the file
 
