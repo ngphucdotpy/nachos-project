@@ -37,7 +37,6 @@
 #define SC_ThreadJoin   15
 
 #define SC_Add		42
-
 // network
 #define SC_SocketTCP    50
 #define SC_Connect      51
@@ -66,6 +65,7 @@ void Halt();
  */ 
 
 int Add(int op1, int op2);
+
 
 /* Address space control operations: Exit, Exec, Execv, and Join */
 
@@ -136,6 +136,7 @@ OpenFileId Open(char *name, int type);  //Mo file voi mode type
  * On failure, a negative error code is returned.
  */
 int Write(char *buffer, int size, OpenFileId id);
+
 
 /* Read "size" bytes from the open file into "buffer".  
  * Return the number of bytes actually read -- if the open file isn't
