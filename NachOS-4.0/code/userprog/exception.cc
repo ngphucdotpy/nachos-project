@@ -279,7 +279,10 @@ void ExceptionHandler(ExceptionType which)
 												  << "\n");
 				}
 			}
-			kernel->machine->WriteRegister(2, -1);
+			else {
+				DEBUG(dbgSys, "Khong the dong file so " << id << "\n");
+				kernel->machine->WriteRegister(2, -1);
+			}
 			increasePC();
 			DEBUG(dbgSys, "Tang bien PC "
 
@@ -331,7 +334,8 @@ void ExceptionHandler(ExceptionType which)
 			DEBUG(dbgSys, "Tang bien PC "
 							  << "\n");
 			increasePC();
-
+			delete filename;
+			
 			return;
 			ASSERTNOTREACHED();
 			break;
