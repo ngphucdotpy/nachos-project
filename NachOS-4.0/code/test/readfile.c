@@ -18,7 +18,6 @@ int main()
             size_buff = Read(buffer, size_buff, fileid);
         }
     }
-
     Close(fileid);
     Halt();
 }
