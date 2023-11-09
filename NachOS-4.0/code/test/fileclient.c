@@ -9,13 +9,13 @@ int strlen(const char *str)
     return (s - str);
 }
 
-int main() {
+int main(int argc, char *argv[]) {
     char ip[] = "127.0.0.1";
     int port = 1234;
     char bufferIn[MAXLENGTH];
     char bufferOut[MAXLENGTH];
-    char fileNameIn[] = "a.txt";
-    char fileNameOut[] = "b.txt";
+    char *fileNameIn = argv[1];
+    char *fileNameOut = argv[2];
 
     int fileIn;
     int fileOut;
@@ -38,6 +38,8 @@ int main() {
     }
 
     Write(bufferOut, strlen(bufferOut) + 1,fileOut);
+
+    Close_(sid);
 
     Halt();
 }
