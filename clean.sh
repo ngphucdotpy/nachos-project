@@ -1,3 +1,5 @@
+rm echosever
+
 cd NachOS-4.0/code/build.linux
 make clean
 make distclean
