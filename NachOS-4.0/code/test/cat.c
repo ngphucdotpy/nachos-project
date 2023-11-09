@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     // }
     /*Create a file*/
     // Create("Hello.txt");
-    fileid = Open(filename, 1);
+    fileid = Open(filename, 0);
     if (fileid != -1)
     {
         char *buffer = "0123456789";

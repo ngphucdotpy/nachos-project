@@ -1,7 +1,7 @@
 #include "syscall.h"
 #define maxlen 32
 
-int main()
+int main(int argc, char *argv[])
 {
     int len;
     char filename[maxlen];
@@ -10,7 +10,8 @@ int main()
     int fileid = Open("Hello.txt", 3);
     if (fileid != -1)
     {
-        char *buffer = "123456789999";
+        // char *buffer = "123456789999";
+        char *buffer = argv[1];
         int size = 10;
         int size_buff = Write(buffer, size, fileid);
     }
