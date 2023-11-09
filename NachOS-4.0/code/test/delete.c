@@ -6,17 +6,13 @@ int main()
     int len;
     char filename[maxlen + 1];
     /*Create a file*/
-    if (Create("Hello.txt") == -1)
+    if (Remove("openfile.c") == -1)
     {
-        return -1;
+        // xuất thông báo lỗi tạo tập tin
     }
     else
     {
-        int id = Open("Hello.txt",1);
-        Close(id);
-        Remove("Hello.txt");
         // xuất thông báo tạo tập tin thành công
-        Halt();
-        return 1;
     }
+    Halt();
 }
