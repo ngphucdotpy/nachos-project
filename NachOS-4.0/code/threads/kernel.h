@@ -19,6 +19,7 @@
 #include "filesys.h"
 #include "machine.h"
 // #include "synchconsole.h"
+#include "networktable.h"
 
 class PostOfficeInput;
 class PostOfficeOutput;
@@ -62,6 +63,7 @@ class Kernel {
     FileSystem *fileSystem;     
     PostOfficeInput *postOfficeIn;
     PostOfficeOutput *postOfficeOut;
+    NetworkTable *networkTable;
 
     int hostName;               // machine identifier
 

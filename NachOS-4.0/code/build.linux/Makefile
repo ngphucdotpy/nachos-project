@@ -309,7 +309,8 @@ FILESYS_C =../filesys/directory.cc\
 
 FILESYS_O =directory.o filehdr.o filesys.o pbitmap.o openfile.o synchdisk.o
 
-NETWORK_H = ../network/post.h
+NETWORK_H = ../network/post.h\
+	../network/networktable.h\
 
 NETWORK_C = ../network/post.cc
 

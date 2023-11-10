@@ -110,6 +110,7 @@ Kernel::Initialize()
     postOfficeOut = new PostOfficeOutput(reliability);
 
     interrupt->Enable();
+    networkTable = new NetworkTable();
 }
 
 //----------------------------------------------------------------------

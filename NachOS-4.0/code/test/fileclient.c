@@ -14,8 +14,8 @@ int main(int argc, char *argv[]) {
     int port = 1234;
     char bufferIn[MAXLENGTH];
     char bufferOut[MAXLENGTH];
-    char *fileNameIn = argv[1];
-    char *fileNameOut = argv[2];
+    char fileNameIn[] = "a.txt";
+    char fileNameOut[] = "b.txt";
 
     int fileIn;
     int fileOut;
@@ -33,8 +33,8 @@ int main(int argc, char *argv[]) {
 
     if (Connect(sid, ip, port) == 0)
     {
-        Send(sid, bufferIn, strlen(bufferIn) + 1);
-        Receive(sid, bufferOut, strlen(bufferIn) + 1);
+        Send(sid, bufferIn, strlen(bufferIn));
+        Receive(sid, bufferOut, strlen(bufferIn));
     }
 
     Write(bufferOut, strlen(bufferOut) + 1,fileOut);

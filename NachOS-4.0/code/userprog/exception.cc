@@ -692,10 +692,9 @@ void ExceptionHandler(ExceptionType which)
 		// network
 		case SC_SocketTCP:
 		{
-			int sid = socket(AF_INET, SOCK_STREAM, 0);
+			int sid = kernel->networkTable->SocketTCP();
 			if (sid < 0)
 			{
-
 				DEBUG(dbgSys, "Failed to create socket." << sid << "\n");
 				kernel->machine->WriteRegister(2, -1);
 			}
@@ -741,7 +740,7 @@ void ExceptionHandler(ExceptionType which)
 			kernel->machine->WriteRegister(2, result);
 
 			increasePC();
-			delete ip;
+			delete[] ip;
 
 			return;
 			ASSERTNOTREACHED();
@@ -782,7 +781,7 @@ void ExceptionHandler(ExceptionType which)
 			}
 
 			increasePC();
-			delete buffer;
+			delete[] buffer;
 
 			return;
 			ASSERTNOTREACHED();
@@ -828,7 +827,7 @@ void ExceptionHandler(ExceptionType which)
 		{
 			int sid = kernel->machine->ReadRegister(4);
 
-			int result = close(sid);
+			int result = kernel->networkTable->Close(sid);
 
 			if (result < 0)
 			{
