@@ -4,23 +4,27 @@
 int main(int argc, char *argv[])
 {
     int fileid;
-    int len = maxlen;
     int index;
-    int idConsole ;
+    int idConsole;
     char *filename;
-    filename=argv[1];
-    // while (argv[0][index] != '\0' && len != 0)
-    // {
-    //     filename[index] = argv[0][index];
-    //     ++index;
-    //     --len;
-    // }
-    // if(argv[0][index]!= '\0')
-    // {
-    //     filename[index]!= '\0';
-    // }
+    int len;
     /*Create a file*/
     // Create("Hello.txt");
+    int stdin;
+    int stdout;
+    stdin = Open("stdin", 2);
+    if (stdin != -1)
+    {
+        len = Read(filename, maxlen, stdin);
+        if (len <= 1)
+        {
+            return -1;
+        }
+    }
+    else
+    {
+        Close("stdin");
+    }
     fileid = Open(filename, 0);
     if (fileid != -1)
     {
