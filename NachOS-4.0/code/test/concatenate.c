@@ -4,33 +4,47 @@
 int main()
 {
     int len;
-    char *filename;
-    
-    int readfilename = Open("stdin", 2);
+    char a[maxlen];
+    char b[maxlen];
+    int fileid_b;
+    int fileid_a;
+    /*Create a file*/
+    // Create("Hello.txt");
+    int stdin;
+    int read_a;
+    int read_b;
     int length = maxlen;
-    
-    int read = Read(filename, length, readfilename);
-    int fileid = Open(filename, 0);
-    if (fileid != -1)
+    stdin = Open("stdin", 2);
+    read_a = Read(a, length, stdin);
+    if (read_a == -1)
+    {
+        Close("stdin");
+        return -1;
+    }
+    Close("stdin");
+    stdin = Open("stdin", 2);
+    read_b = Read(b, length, stdin);
+    Close("stdin");
+    fileid_b = Open(b, 1);
+    fileid_a = Open(a, 1);
+    Seek(-1, fileid_a);
+    if (fileid_a != -1 && fileid_b != -1)
     {
         char *buffer = "0123456789";
         int size = 10;
-        int size_buff = Read(buffer, size, fileid);
-        int idConsole = Open("stdout", 3);
-        if (idConsole == -1)
-        {
-            Close(fileid);
-            Halt();
-            return;
-        }
+        int size_buff = Read(buffer, size, fileid_b);
         while (size_buff > 0)
         {
-
-            Write(buffer, size, idConsole);
-            size_buff = Read(buffer, size, fileid);
+            if (size_buff != size)
+            {
+                Write(buffer, size_buff, fileid_a);
+                break;
+            }
+            Write(buffer, size, fileid_a);
+            size_buff = Read(buffer, size, fileid_b);
         }
-        Close(idConsole);
     }
-    Close(fileid);
+    Close(fileid_a);
+    Close(fileid_b);
     Halt();
 }

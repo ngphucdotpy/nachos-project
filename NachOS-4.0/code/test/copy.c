@@ -4,30 +4,43 @@
 int main()
 {
     int len;
-    char *a;
-    char*b;
+    char a[maxlen];
+    char b[maxlen];
     int fileid_b;
     int fileid_a;
     /*Create a file*/
     // Create("Hello.txt");
-    int readfilename = Open("stdin", 2);
+    int stdin;
+    int read_a;
+    int read_b;
     int length = maxlen;
-    
-    int read = Read(a, length, readfilename);
-    fileid_a = Open(a, 0);
-    read = Read(b, length, readfilename);
-    fileid_b= Create(b);
+    stdin = Open("stdin", 2);
+    read_a = Read(a, length, stdin);
+    if (read_a == -1)
+    {
+        Close("stdin");
+        return -1;
+    }
+    Close("stdin");
+    stdin = Open("stdin", 2);
+    read_b = Read(b, length, stdin);
+    Close("stdin");
+    fileid_b = Create(b);
     Close(fileid_b);
-    fileid_a = Open(a, 0);
+    fileid_a = Open(a, 1);
     if (fileid_a != -1)
     {
         char *buffer = "0123456789";
         int size = 10;
         int size_buff = Read(buffer, size, fileid_a);
-        fileid_b=Open(b,1);
+        fileid_b = Open(b, 1);
         while (size_buff > 0)
         {
-
+            if (size_buff != size)
+            {
+                Write(buffer, size_buff, fileid_b);
+                break;
+            }
             Write(buffer, size, fileid_b);
             size_buff = Read(buffer, size, fileid_a);
         }
