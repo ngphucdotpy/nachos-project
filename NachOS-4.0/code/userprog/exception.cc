@@ -387,8 +387,9 @@ void ExceptionHandler(ExceptionType which)
 			// Read file bang stdin
 			if (kernel->fileSystem->fileDes[id]->type == 2)
 			{
-				printf("Read file Console input.\n");
-				DEBUG(dbgSys, "Read file Console input.\n");
+				printf("Read file Console input:\n");
+				printf("Nhap: \n");
+				DEBUG(dbgSys, "Read file Console input:\n");
 				// Convert data in buffer to 0
 				for (int i = 0; i < size; i++)
 				{
@@ -409,7 +410,7 @@ void ExceptionHandler(ExceptionType which)
 					{
 						ch = kernel->GetChar();
 
-					} while (ch == EOF);
+					} while (ch == EOF && ch!='\n');
 
 					if ((ch == '\012') || (ch == '\001'))
 					{
