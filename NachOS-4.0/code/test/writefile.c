@@ -3,7 +3,7 @@
 
 int main()
 {
-    int fileid = Open("Hello.txt", 3);
+    int fileid = Open("fileWriteConsole.txt", 3);
     if (fileid != -1)
     {
         // char *buffer = "123456789999";
