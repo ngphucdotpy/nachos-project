@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
     int fileid;
     int index;
     int idConsole;
-    char *filename;
+    char filename[maxlen];
     int len;
     /*Create a file*/
     // Create("Hello.txt");
@@ -18,13 +18,12 @@ int main(int argc, char *argv[])
         len = Read(filename, maxlen, stdin);
         if (len <= 1)
         {
+            Close("stdin");
+            Halt();
             return -1;
         }
     }
-    else
-    {
-        Close("stdin");
-    }
+    Close("stdin");
     fileid = Open(filename, 0);
     if (fileid != -1)
     {

@@ -37,6 +37,9 @@
 #define SC_ThreadJoin   15
 
 #define SC_Add		42
+#define SC_ReadConsole 45
+#define SC_WriteConsole 46
+
 // network
 #define SC_SocketTCP    50
 #define SC_Connect      51
@@ -66,6 +69,8 @@ void Halt();
 
 int Add(int op1, int op2);
 
+// int ReadConsole(char*buffer,int length);
+// int WriteConsole(char*buffer,int length);
 
 /* Address space control operations: Exit, Exec, Execv, and Join */
 

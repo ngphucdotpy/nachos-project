@@ -15,15 +15,34 @@ int main()
     int read_b;
     int length = maxlen;
     stdin = Open("stdin", 2);
+    if(stdin==-1)
+    {
+        Close("stdin");
+        Halt();
+        return 0;
+    }
     read_a = Read(a, length, stdin);
     if (read_a == -1)
     {
         Close("stdin");
-        return -1;
+        Halt();
+        return 0;
     }
     Close("stdin");
     stdin = Open("stdin", 2);
+    if(stdin==-1)
+    {
+        Close("stdin");
+        Halt();
+        return 0;
+    }
     read_b = Read(b, length, stdin);
+    if (read_b == -1)
+    {
+        Close("stdin");
+        Halt();
+        return 0;
+    }
     Close("stdin");
     fileid_b = Create(b);
     Close(fileid_b);

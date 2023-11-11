@@ -129,7 +129,7 @@ void ExceptionHandler(ExceptionType which)
 
 			ASSERTNOTREACHED();
 			break;
-		
+
 		case SC_Add:
 			DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
 
@@ -254,7 +254,7 @@ void ExceptionHandler(ExceptionType which)
 				else
 				{
 					// Neu khong mo duoc file
-					DEBUG(dbgSys, "Cannot open file " << filename<<  ".\n");
+					DEBUG(dbgSys, "Cannot open file " << filename << ".\n");
 					kernel->machine->WriteRegister(2, -1);
 				}
 			}
@@ -276,7 +276,7 @@ void ExceptionHandler(ExceptionType which)
 			// Doc id cua file(OpenFileID)
 			DEBUG(dbgSys, "SC_Close call ...");
 			int id = kernel->machine->ReadRegister(4);
-			DEBUG(dbgSys, "Closing file with ID: "<<id<<"\n");
+			DEBUG(dbgSys, "Closing file with ID: " << id << "\n");
 			if (id >= 0 && id <= 19)
 			{
 				if (kernel->fileSystem->fileDes[id]) // neu co mo file
@@ -284,11 +284,14 @@ void ExceptionHandler(ExceptionType which)
 					delete kernel->fileSystem->fileDes[id];
 					kernel->fileSystem->fileDes[id] = NULL;
 					kernel->machine->WriteRegister(2, 0);
-					DEBUG(dbgSys, "File closed successfully." << "\n");
+					DEBUG(dbgSys, "File closed successfully."
+									  << "\n");
 				}
 			}
-			else {
-				DEBUG(dbgSys, "Cannot close file. " << "\n");
+			else
+			{
+				DEBUG(dbgSys, "Cannot close file. "
+								  << "\n");
 				kernel->machine->WriteRegister(2, -1);
 			}
 
@@ -301,7 +304,8 @@ void ExceptionHandler(ExceptionType which)
 
 		case SC_Remove:
 		{
-			DEBUG(dbgSys, "SC_Remove call ..." << "\n");
+			DEBUG(dbgSys, "SC_Remove call ..."
+							  << "\n");
 			int virtAddr = kernel->machine->ReadRegister(4);
 			char *filename;
 			filename = User2System(virtAddr, MaxFileLength);
@@ -315,16 +319,18 @@ void ExceptionHandler(ExceptionType which)
 				return;
 			}
 			DEBUG(dbgSys, "\n Finish reading filename.");
-			DEBUG(dbgSys,"Removing file "<< filename<< "\n");
-			for (int i =0 ;i<20;i++) {
-				if (kernel->fileSystem->fileDes[i] != NULL && strcmp(kernel->fileSystem->fileDes[i]->filename,filename)==0) {
-					DEBUG(dbgSys,"\n Error: File is opening. Cannot remove file.");
+			DEBUG(dbgSys, "Removing file " << filename << "\n");
+			for (int i = 0; i < 20; i++)
+			{
+				if (kernel->fileSystem->fileDes[i] != NULL && strcmp(kernel->fileSystem->fileDes[i]->filename, filename) == 0)
+				{
+					DEBUG(dbgSys, "\n Error: File is opening. Cannot remove file.");
 					kernel->machine->WriteRegister(2, -1);
 					increasePC();
 					delete filename;
 					return;
 				}
-			} 
+			}
 			if (!kernel->fileSystem->Remove(filename))
 			{
 				printf("\n Error remove file '%s'", filename);
@@ -334,16 +340,25 @@ void ExceptionHandler(ExceptionType which)
 				delete filename;
 				return;
 			}
-			DEBUG(dbgSys, "File deleted successfully. "<< "\n");
+			DEBUG(dbgSys, "File deleted successfully. "
+							  << "\n");
 
 			kernel->machine->WriteRegister(2, 0);
 			increasePC();
 			delete filename;
-			
+
 			return;
 			ASSERTNOTREACHED();
 			break;
 		}
+		// case SC_ReadConsole:
+		// {
+		// 	break;
+		// }
+		// case SC_WriteConsole:
+		// {
+		// 	break;
+		// }
 		case SC_Read:
 		{
 			// Doc id cua file(OpenFileID)
@@ -391,29 +406,23 @@ void ExceptionHandler(ExceptionType which)
 			if (kernel->fileSystem->fileDes[id]->type == 2)
 			{
 				printf("Read file Console input.\n");
+				printf("Nhap Buffer: \n");
 				DEBUG(dbgSys, "Read file Console input.\n");
 				// Convert data in buffer to 0
-				for (int i = 0; i < size; i++)
-				{
-					buffer[i] = 0;
-				}
 
 				// Use class SynchConsoleInput to get data from console
 				int loop = 0;
 				// char *filename = NULL;
 				// kernel->synchConsoleIn;
 				// SynchConsoleInput* conslInput = new SynchConsoleInput(NULL);
-				DEBUG(dbgSys, "Vao Loop-----------------------------------------\n");
-				DEBUG(dbgSys, "Nhap Buffer: ");
+				DEBUG(dbgSys, "Nhap Buffer: \n");
+				cout.flush();
+
 				while (loop < size)
 				{
-					// Create class SynchConsoleInput
+					// Using class SynchConsoleInput
 
-					do
-					{
-						ch = kernel->GetChar();
-
-					} while (ch == EOF);
+					ch = kernel->GetChar();
 
 					if ((ch == '\012') || (ch == '\001'))
 					{
@@ -426,8 +435,6 @@ void ExceptionHandler(ExceptionType which)
 					}
 				}
 				DEBUG(dbgSys, "Buffer: " << buffer << "\n");
-
-				DEBUG(dbgSys, "Xong Loop-----------------------------------------\n");
 
 				int size_buff = 0;
 				if (ch == '\001')
@@ -620,13 +627,12 @@ void ExceptionHandler(ExceptionType which)
 			{
 				printf("\n Khong the seek den vi tri nay \n");
 				kernel->machine->WriteRegister(2, -1);
-				
 			}
 			else
 			{
 				kernel->fileSystem->fileDes[id]->Seek(position);
 				DEBUG(dbgSys, "Seek file thanh cong\n");
-				DEBUG(dbgSys, "Vi tri Seek den: "<<position<<"\n");
+				DEBUG(dbgSys, "Vi tri Seek den: " << position << "\n");
 				kernel->machine->WriteRegister(2, position);
 			}
 			increasePC();
