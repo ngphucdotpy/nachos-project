@@ -32,25 +32,37 @@ int main()
     if (Connect(list[0], ip, port) == 0)
     {
         if (Send(list[0], buffer_1, strlen(buffer_1) + 1) > 0)
+        {
             Receive(list[0], buffer_1, strlen(buffer_1) + 1);
+            PrintConsole(buffer_1, strlen(buffer_1) + 1);
+        }
     }
 
     if (Connect(list[1], ip, port) == 0)
     {
         if (Send(list[1], buffer_2, strlen(buffer_2) + 1) > 0)
+        {
             Receive(list[1], buffer_2, strlen(buffer_2) + 1);
+            PrintConsole(buffer_2, strlen(buffer_2) + 1);
+        }
     }
 
     if (Connect(list[2], ip, port) == 0)
     {
         if (Send(list[2], buffer_3, strlen(buffer_3) + 1) > 0)
+        {
             Receive(list[2], buffer_3, strlen(buffer_3) + 1);
+            PrintConsole(buffer_3, strlen(buffer_3) + 1);
+        }
     }
 
     if (Connect(list[3], ip, port) == 0)
     {
         if (Send(list[3], buffer_4, strlen(buffer_4) + 1) > 0)
+        {
             Receive(list[3], buffer_4, strlen(buffer_4) + 1);
+            PrintConsole(buffer_4, strlen(buffer_4) + 1);
+        }
     }
 
     for (i = 0; i < 4; i++)

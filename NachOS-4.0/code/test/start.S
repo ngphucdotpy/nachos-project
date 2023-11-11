@@ -218,6 +218,14 @@ Close_:
 	syscall
 	j 	$31
 	.end Close_
+
+	.globl PrintConsole
+	.ent    PrintConsole
+PrintConsole:
+	addiu $2, $0, SC_PrintConsole
+	syscall
+	j 	$31
+	.end PrintConsole
 	
 /* dummy function to keep gcc happy */
         .globl  __main
