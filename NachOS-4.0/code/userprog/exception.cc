@@ -129,7 +129,7 @@ void ExceptionHandler(ExceptionType which)
 
 			ASSERTNOTREACHED();
 			break;
-
+		
 		case SC_Add:
 			DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
 
@@ -198,6 +198,7 @@ void ExceptionHandler(ExceptionType which)
 				return;
 			}
 
+			DEBUG(dbgSys, "\n File " << filename << " created successfully");
 			kernel->machine->WriteRegister(2, 0); // trả về cho chương trình
 												  // người dùng thành công
 			increasePC();
@@ -210,26 +211,35 @@ void ExceptionHandler(ExceptionType which)
 
 		case SC_Open:
 		{
-			DEBUG(dbgSys, "Vao case SC_Open. ");
+			DEBUG(dbgSys, "SC_Open call ...");
 			int virtAddr = kernel->machine->ReadRegister(4);
 			int type = kernel->machine->ReadRegister(5);
 			char *filename;
 			filename = User2System(virtAddr, MaxFileLength);
-			DEBUG(dbgSys, "Mo file " << filename << ". Type: " << type << "\n");
+			if (filename == NULL)
+			{
+				printf("\n Not enough memory in system");
+				DEBUG(dbgSys, "\n Not enough memory in system");
+				kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương
+				// trình người dùng
+				increasePC();
+				delete filename;
+				return;
+			}
+			DEBUG(dbgSys, "\n Finish reading filename.");
 			int freeSlot = kernel->fileSystem->FindFreeSlot();
 			if (freeSlot != -1)
 			{
 				if (type == 0 || type == 1)
-				{ // 0: read and write 	1: read only
+				{ // 0: read only   1:read & write
 					if ((kernel->fileSystem->fileDes[freeSlot] = kernel->fileSystem->Open(filename, type)) != NULL)
 					{
-						DEBUG(dbgSys, "Mo File Thanh Cong. FileID: " << freeSlot << "\n");
+						DEBUG(dbgSys, "File " << filename << " opened successfully. FileID: " << freeSlot << ".\n");
 						kernel->machine->WriteRegister(2, freeSlot);
 					}
 					else
 					{
-						DEBUG(dbgSys, "Khong the mo file."
-										  << "\n");
+						DEBUG(dbgSys, "Cannot open file " << filename << ".\n");
 						kernel->machine->WriteRegister(2, -1);
 					}
 				}
@@ -244,19 +254,16 @@ void ExceptionHandler(ExceptionType which)
 				else
 				{
 					// Neu khong mo duoc file
-					DEBUG(dbgSys, "Khong the mo file."
-									  << "\n");
+					DEBUG(dbgSys, "Cannot open file " << filename<<  ".\n");
 					kernel->machine->WriteRegister(2, -1);
 				}
 			}
 			else
 			{
-				DEBUG(dbgSys, "Khong the mo file."
-								  << "\n");
+				DEBUG(dbgSys, "Cannot open file " << filename << ".\n");
 				kernel->machine->WriteRegister(2, -1);
 			}
-			DEBUG(dbgSys, "Tang bien PC "
-							  << "\n");
+
 			increasePC();
 			delete[] filename;
 
@@ -267,7 +274,9 @@ void ExceptionHandler(ExceptionType which)
 		case SC_Close:
 		{
 			// Doc id cua file(OpenFileID)
+			DEBUG(dbgSys, "SC_Close call ...");
 			int id = kernel->machine->ReadRegister(4);
+			DEBUG(dbgSys, "Closing file with ID: "<<id<<"\n");
 			if (id >= 0 && id <= 19)
 			{
 				if (kernel->fileSystem->fileDes[id]) // neu co mo file
@@ -275,19 +284,15 @@ void ExceptionHandler(ExceptionType which)
 					delete kernel->fileSystem->fileDes[id];
 					kernel->fileSystem->fileDes[id] = NULL;
 					kernel->machine->WriteRegister(2, 0);
-					DEBUG(dbgSys, "Dong file so " << id << " thanh cong "
-												  << "\n");
+					DEBUG(dbgSys, "File closed successfully." << "\n");
 				}
 			}
-			else
-			{
-				DEBUG(dbgSys, "Khong the dong file so " << id << "\n");
+			else {
+				DEBUG(dbgSys, "Cannot close file. " << "\n");
 				kernel->machine->WriteRegister(2, -1);
 			}
-			increasePC();
-			DEBUG(dbgSys, "Tang bien PC "
 
-							  << "\n");
+			increasePC();
 
 			return;
 			ASSERTNOTREACHED();
@@ -296,12 +301,12 @@ void ExceptionHandler(ExceptionType which)
 
 		case SC_Remove:
 		{
+			DEBUG(dbgSys, "SC_Remove call ..." << "\n");
 			int virtAddr = kernel->machine->ReadRegister(4);
 			char *filename;
 			filename = User2System(virtAddr, MaxFileLength);
 			if (filename == NULL)
 			{
-				printf("\n Not enough memory in system");
 				DEBUG(dbgSys, "\n Not enough memory in system");
 				kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương
 				// trình người dùng
@@ -309,18 +314,17 @@ void ExceptionHandler(ExceptionType which)
 				delete filename;
 				return;
 			}
-			for (int i = 0; i < 20; i++)
-			{
-				if (kernel->fileSystem->fileDes[i] != NULL && strcmp(kernel->fileSystem->fileDes[i]->filename, filename) == 0)
-				{
-					DEBUG(dbgSys, "\n Error: File is opening. Cannot remove file.");
+			DEBUG(dbgSys, "\n Finish reading filename.");
+			DEBUG(dbgSys,"Removing file "<< filename<< "\n");
+			for (int i =0 ;i<20;i++) {
+				if (kernel->fileSystem->fileDes[i] != NULL && strcmp(kernel->fileSystem->fileDes[i]->filename,filename)==0) {
+					DEBUG(dbgSys,"\n Error: File is opening. Cannot remove file.");
 					kernel->machine->WriteRegister(2, -1);
 					increasePC();
 					delete filename;
 					return;
 				}
-			}
-			DEBUG(dbgSys, "\nFinish reading filename.");
+			} 
 			if (!kernel->fileSystem->Remove(filename))
 			{
 				printf("\n Error remove file '%s'", filename);
@@ -330,15 +334,12 @@ void ExceptionHandler(ExceptionType which)
 				delete filename;
 				return;
 			}
-			DEBUG(dbgSys, "Xoa file thanh cong. "
-							  << "\n");
-			kernel->machine->WriteRegister(2, 0);
+			DEBUG(dbgSys, "File deleted successfully. "<< "\n");
 
-			DEBUG(dbgSys, "Tang bien PC "
-							  << "\n");
+			kernel->machine->WriteRegister(2, 0);
 			increasePC();
 			delete filename;
-
+			
 			return;
 			ASSERTNOTREACHED();
 			break;
@@ -354,6 +355,8 @@ void ExceptionHandler(ExceptionType which)
 			char *buffer;
 			buffer = User2System(virtAddr, size);
 			OpenFile *fileopen = kernel->fileSystem->fileDes[id];
+			DEBUG(dbgSys, "Read file " << buffer << ". Size: " << size << ", ID:" << id << ", Type:" << fileopen->type << "\n");
+
 			if (id < 0 || id > 19)
 			{
 				printf("Khong the mo file.\n");
@@ -387,9 +390,8 @@ void ExceptionHandler(ExceptionType which)
 			// Read file bang stdin
 			if (kernel->fileSystem->fileDes[id]->type == 2)
 			{
-				printf("Read file Console input:\n");
-				printf("Nhap: \n");
-				DEBUG(dbgSys, "Read file Console input:\n");
+				printf("Read file Console input.\n");
+				DEBUG(dbgSys, "Read file Console input.\n");
 				// Convert data in buffer to 0
 				for (int i = 0; i < size; i++)
 				{
@@ -401,6 +403,7 @@ void ExceptionHandler(ExceptionType which)
 				// char *filename = NULL;
 				// kernel->synchConsoleIn;
 				// SynchConsoleInput* conslInput = new SynchConsoleInput(NULL);
+				DEBUG(dbgSys, "Vao Loop-----------------------------------------\n");
 				DEBUG(dbgSys, "Nhap Buffer: ");
 				while (loop < size)
 				{
@@ -410,7 +413,7 @@ void ExceptionHandler(ExceptionType which)
 					{
 						ch = kernel->GetChar();
 
-					} while (ch == EOF && ch!='\n');
+					} while (ch == EOF);
 
 					if ((ch == '\012') || (ch == '\001'))
 					{
@@ -422,6 +425,9 @@ void ExceptionHandler(ExceptionType which)
 						++loop;
 					}
 				}
+				DEBUG(dbgSys, "Buffer: " << buffer << "\n");
+
+				DEBUG(dbgSys, "Xong Loop-----------------------------------------\n");
 
 				int size_buff = 0;
 				if (ch == '\001')
@@ -432,7 +438,7 @@ void ExceptionHandler(ExceptionType which)
 				{
 					size_buff = loop;
 				}
-				// tra byte read ve cho user
+				DEBUG(dbgSys, " Byte read: " << size_buff << "\n");
 				System2User(virtAddr, size_buff, buffer);
 
 				kernel->machine->WriteRegister(2, size_buff);
@@ -444,20 +450,19 @@ void ExceptionHandler(ExceptionType which)
 			// truong hop Read file binh thuong
 			int OldPosition = kernel->fileSystem->fileDes[id]->GetPosition();
 			// Lam rong buffer
-				// for (int i = 0; i < size; i++)
-				// {
-				// 	buffer[i] = '\0';
-				// }
+			for (int i = 0; i < size; i++)
+			{
+				buffer[i] = 0;
+			}
 
 			if (kernel->fileSystem->fileDes[id]->Read(buffer, size) > 0)
 			{
 				int NewPosition = kernel->fileSystem->fileDes[id]->GetPosition();
-				buffer[NewPosition - OldPosition]='\0';
+
 				System2User(virtAddr, NewPosition - OldPosition, buffer);
 				kernel->machine->WriteRegister(2, NewPosition - OldPosition);
-				DEBUG(dbgSys, "Buffer:"<<buffer<<"\n");
 
-				DEBUG(dbgSys, "Read file thanh cong\n");
+				DEBUG(dbgSys, "Read file thanh cong, So byte: " << NewPosition - OldPosition << ", Buffer: " << buffer << "\n");
 			}
 			else
 			{
@@ -484,6 +489,8 @@ void ExceptionHandler(ExceptionType which)
 			char *buffer;
 			buffer = User2System(virtAddr, size);
 			OpenFile *fileopen = kernel->fileSystem->fileDes[id];
+			DEBUG(dbgSys, "Write file " << buffer << ". Size: " << size << ", ID:" << id << ", Type:" << fileopen->type << "\n");
+
 			if (id < 0 || id > 19)
 			{
 				printf("Khong the Write file.\n");
@@ -528,16 +535,15 @@ void ExceptionHandler(ExceptionType which)
 				DEBUG(dbgSys, "Write file read and wite.\n");
 				if ((kernel->fileSystem->fileDes[id]->Write(buffer, size)) > 0)
 				{
+					DEBUG(dbgSys, "Write Success.\n");
 					int NewPosition = kernel->fileSystem->fileDes[id]->GetPosition();
 					kernel->machine->WriteRegister(2, NewPosition - OldPosition);
-					DEBUG(dbgSys, "Write Success.\n");
-
+					DEBUG(dbgSys, "Byte write: " << NewPosition - OldPosition << ".\n");
 					delete buffer;
 				}
 				else
 				{
 					kernel->machine->WriteRegister(2, -1);
-					DEBUG(dbgSys, "Write Faile.\n");
 					delete buffer;
 				}
 				increasePC();
@@ -546,24 +552,21 @@ void ExceptionHandler(ExceptionType which)
 			// Write Console
 			if (kernel->fileSystem->fileDes[id]->type == 3)
 			{
+
 				int i = 0;
-				while (buffer[i] != 0 && buffer[i]!=EOF)
+				while (buffer[i] != 0 && buffer[i] != '\n')
 				{
 					char ch = buffer[i];
 					kernel->PushChar(ch);
 					i++;
 				}
-				if (buffer[i] == EOF)
-				{
-					buffer[i] = '\0';
-				}
+				buffer[i] = '\n';
+				kernel->PushChar('\n');
 				kernel->machine->WriteRegister(2, i - 1);
-				DEBUG(dbgSys, "Write Success.\n");
 			}
 			else
 			{
 				kernel->machine->WriteRegister(2, -1);
-				DEBUG(dbgSys, "Write Fail.\n");
 			}
 
 			increasePC();
@@ -574,63 +577,6 @@ void ExceptionHandler(ExceptionType which)
 			ASSERTNOTREACHED();
 			break;
 		}
-		// case SC_ReadFileName:
-		// {
-		// 	int virtAddr = kernel->machine->ReadRegister(4);
-		// 	int size = kernel->machine->ReadRegister(5);
-		// 	char *buffer = User2System(virtAddr, size);
-		// 	char ch = 'a';
-		// 	for (int i = 0; i < size; i++)
-		// 	{
-		// 		buffer[i] = 0;
-		// 	}
-
-		// 	// Use class SynchConsoleInput to get data from console
-		// 	int loop = 0;
-		// 	// char *filename = NULL;
-		// 	// kernel->synchConsoleIn;
-		// 	// SynchConsoleInput* conslInput = new SynchConsoleInput(NULL);
-		// 	printf("Nhap Buffer: ");
-		// 	while (loop < size)
-		// 	{
-		// 		// Create class SynchConsoleInput
-
-		// 		do
-		// 		{
-		// 			ch = kernel->GetChar();
-
-		// 		} while (ch == EOF);
-
-		// 		if ((ch == '\012') || (ch == '\001'))
-		// 		{
-		// 			break;
-		// 		}
-		// 		else
-		// 		{
-		// 			buffer[loop] = ch;
-		// 			++loop;
-		// 		}
-		// 	}
-
-		// 	int size_buff = 0;
-		// 	if (ch == '\001')
-		// 	{
-		// 		size_buff = -1;
-		// 	}
-		// 	else
-		// 	{
-		// 		size_buff = loop;
-		// 	}
-		// 	// tra byte read ve cho user
-		// 	System2User(virtAddr, size_buff, buffer);
-		// 	kernel->machine->WriteRegister(2, 1);
-		// 	delete buffer;
-		// 	// increasePC();
-		// 	// return;
-		// 	return;
-		// 	ASSERTNOTREACHED();
-		// 	break;
-		// }
 		case SC_Seek:
 		{
 			// Doc id cua file(OpenFileID)
@@ -674,11 +620,13 @@ void ExceptionHandler(ExceptionType which)
 			{
 				printf("\n Khong the seek den vi tri nay \n");
 				kernel->machine->WriteRegister(2, -1);
+				
 			}
 			else
 			{
 				kernel->fileSystem->fileDes[id]->Seek(position);
 				DEBUG(dbgSys, "Seek file thanh cong\n");
+				DEBUG(dbgSys, "Vi tri Seek den: "<<position<<"\n");
 				kernel->machine->WriteRegister(2, position);
 			}
 			increasePC();
@@ -692,9 +640,10 @@ void ExceptionHandler(ExceptionType which)
 		// network
 		case SC_SocketTCP:
 		{
-			int sid = kernel->networkTable->SocketTCP();
+			int sid = socket(AF_INET, SOCK_STREAM, 0);
 			if (sid < 0)
 			{
+
 				DEBUG(dbgSys, "Failed to create socket." << sid << "\n");
 				kernel->machine->WriteRegister(2, -1);
 			}
@@ -740,7 +689,7 @@ void ExceptionHandler(ExceptionType which)
 			kernel->machine->WriteRegister(2, result);
 
 			increasePC();
-			delete[] ip;
+			delete ip;
 
 			return;
 			ASSERTNOTREACHED();
@@ -781,7 +730,7 @@ void ExceptionHandler(ExceptionType which)
 			}
 
 			increasePC();
-			delete[] buffer;
+			delete buffer;
 
 			return;
 			ASSERTNOTREACHED();
@@ -827,7 +776,7 @@ void ExceptionHandler(ExceptionType which)
 		{
 			int sid = kernel->machine->ReadRegister(4);
 
-			int result = kernel->networkTable->Close(sid);
+			int result = close(sid);
 
 			if (result < 0)
 			{
