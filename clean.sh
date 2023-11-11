@@ -1,4 +1,4 @@
-rm echosever
+rm echoserver
 
 cd NachOS-4.0/code/build.linux
 make clean

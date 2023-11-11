@@ -9,7 +9,8 @@ int strlen(const char *str)
     return (s - str);
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     char ip[] = "127.0.0.1";
     int port = 1234;
     char bufferIn[MAXLENGTH];
@@ -19,6 +20,7 @@ int main(int argc, char *argv[]) {
 
     int fileIn;
     int fileOut;
+    int size;
 
     int sid = SocketTCP();
 
@@ -29,15 +31,15 @@ int main(int argc, char *argv[]) {
     Create(fileNameOut);
     fileOut = Open(fileNameOut, 1);
 
-    Read(bufferIn, MAXLENGTH, fileIn);
+    size = Read(bufferIn, MAXLENGTH, fileIn);
 
     if (Connect(sid, ip, port) == 0)
     {
-        Send(sid, bufferIn, strlen(bufferIn));
-        Receive(sid, bufferOut, strlen(bufferIn));
+        if (Send(sid, bufferIn, size) > 0)
+            Receive(sid, bufferOut, size);
     }
 
-    Write(bufferOut, strlen(bufferOut) + 1,fileOut);
+    Write(bufferOut, size, fileOut);
 
     Close_(sid);
 

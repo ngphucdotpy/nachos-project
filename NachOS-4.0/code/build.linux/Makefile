@@ -312,9 +312,10 @@ FILESYS_O =directory.o filehdr.o filesys.o pbitmap.o openfile.o synchdisk.o
 NETWORK_H = ../network/post.h\
 	../network/networktable.h\
 
-NETWORK_C = ../network/post.cc
+NETWORK_C = ../network/post.cc\
+			../network/networktable.cc\
 
-NETWORK_O = post.o
+NETWORK_O = post.o networktable.o
 
 ##################################################################
 #  You probably don't want to change anything below this point in
