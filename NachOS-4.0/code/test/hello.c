@@ -5,8 +5,8 @@ int main()
 {
     int len;
     char filename[maxlen + 1];
-    int temp = Create("Hello.txt");
-    int id = Open("Hello.txt",0);
+    int id = Create("Hello.txt");
+    Open(id);
     Close(id);
     Remove("Hello.txt");
     Halt();
