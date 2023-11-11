@@ -649,7 +649,7 @@ void ExceptionHandler(ExceptionType which)
 			}
 			else
 			{
-				DEBUG(dbgSys, "Socked created. Socket ID: " << sid << "\n");
+				DEBUG(dbgSys, "Socked created. Socket ID: " << sid << ". Linux socket ID: " << kernel->networkTable->getSID(sid) << ".\n");
 				kernel->machine->WriteRegister(2, sid);
 			}
 
@@ -675,7 +675,7 @@ void ExceptionHandler(ExceptionType which)
 			svr_addr.sin_addr.s_addr = inet_addr(ip);
 			svr_addr.sin_port = htons(port);
 
-			if (connect(socket_id, (struct sockaddr *)&svr_addr, sizeof(svr_addr)) < 0)
+			if (connect(kernel->networkTable->getSID(socket_id), (struct sockaddr *)&svr_addr, sizeof(svr_addr)) < 0)
 			{
 				DEBUG(dbgSys, "Failed to connect.\n")
 				result = -1;
@@ -703,7 +703,7 @@ void ExceptionHandler(ExceptionType which)
 			int len = kernel->machine->ReadRegister(6);
 
 			char *buffer = User2System(virtAddr, len);
-			int result = send(socket_id, buffer, len, 0);
+			int result = send(kernel->networkTable->getSID(socket_id), buffer, len, 0);
 
 			if (result < 0)
 			{
@@ -737,7 +737,7 @@ void ExceptionHandler(ExceptionType which)
 
 			char buffer[128] = {'\0'}; // = new char[len + 1];
 
-			int result = recv(socket_id, buffer, len, 0);
+			int result = recv(kernel->networkTable->getSID(socket_id), buffer, len, 0);
 
 			if (result < 0)
 			{
@@ -772,12 +772,12 @@ void ExceptionHandler(ExceptionType which)
 
 			if (result < 0)
 			{
-				DEBUG(dbgSys, "Failed to close. SocID: " << sid << "\n");
+				DEBUG(dbgSys, "Failed to close. Socet ID: " << sid << ".\n");
 				kernel->machine->WriteRegister(2, -1);
 			}
 			else
 			{
-				DEBUG(dbgSys, "Socked closed. SocID: " << sid << "\n");
+				DEBUG(dbgSys, "Socked closed. SocID: " << sid << ".\n");
 				kernel->machine->WriteRegister(2, 0);
 			}
 

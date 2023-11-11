@@ -9,16 +9,16 @@
 
 class NetworkTable
 {
-private:
-    int *fd;
-    bool *isUse;
 public:
+    int *fd;
+    // bool *isUse;
     NetworkTable();
     ~NetworkTable();
 
     int SocketTCP();
     int Close(int);
     // bool isAlive(int);
+    int getSID(int);
 };
 
 #endif
