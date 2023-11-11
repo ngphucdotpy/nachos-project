@@ -640,11 +640,11 @@ void ExceptionHandler(ExceptionType which)
 		// network
 		case SC_SocketTCP:
 		{
-			int sid = socket(AF_INET, SOCK_STREAM, 0);
+			int sid = kernel->networkTable->SocketTCP();
 			if (sid < 0)
 			{
 
-				DEBUG(dbgSys, "Failed to create socket." << sid << "\n");
+				DEBUG(dbgSys, "Failed to create socket.\n");
 				kernel->machine->WriteRegister(2, -1);
 			}
 			else
@@ -703,14 +703,6 @@ void ExceptionHandler(ExceptionType which)
 			int len = kernel->machine->ReadRegister(6);
 
 			char *buffer = User2System(virtAddr, len);
-			// if (buffer == NULL)
-			// {
-			// 	DEBUG(dbgSys, "Not enough memory in system.\n");
-			// 	kernel->machine->WriteRegister(2, -1);
-			// 	delete buffer;
-			// 	increasePC();
-			// 	return;
-			// }
 			int result = send(socket_id, buffer, len, 0);
 
 			if (result < 0)
@@ -776,7 +768,7 @@ void ExceptionHandler(ExceptionType which)
 		{
 			int sid = kernel->machine->ReadRegister(4);
 
-			int result = close(sid);
+			int result = kernel->networkTable->Close(sid);
 
 			if (result < 0)
 			{

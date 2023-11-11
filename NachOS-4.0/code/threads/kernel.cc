@@ -108,9 +108,9 @@ Kernel::Initialize()
 #endif // FILESYS_STUB
     postOfficeIn = new PostOfficeInput(10);
     postOfficeOut = new PostOfficeOutput(reliability);
-
-    interrupt->Enable();
     networkTable = new NetworkTable();
+    
+    interrupt->Enable();
 }
 
 //----------------------------------------------------------------------
@@ -131,6 +131,8 @@ Kernel::~Kernel()
     delete fileSystem;
     delete postOfficeIn;
     delete postOfficeOut;
+
+    delete networkTable;
     
     Exit(0);
 }
