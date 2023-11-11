@@ -4,10 +4,10 @@
 int main()
 {
     int len;
-    char filename[maxlen];
-    /*Create a file*/
-    // Create("Hello.txt");
-    int fileid = Open("Hello.txt", 1);
+    int fileid;
+    char* filename="demo.txt";
+    Create(filename);
+    fileid=Open(filename,1);
     if (fileid != -1)
     {
         int position=-1;

@@ -37,6 +37,7 @@
 #define SC_ThreadJoin   15
 
 #define SC_Add		42
+
 // network
 #define SC_SocketTCP    50
 #define SC_Connect      51
@@ -44,7 +45,7 @@
 #define SC_Receive      53
 #define SC_Close_       54
 #define SC_PrintConsole 55
-
+#define SC_ReadConsole 56
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos
@@ -67,6 +68,8 @@ void Halt();
 
 int Add(int op1, int op2);
 
+// int ReadConsole(char*buffer,int length);
+// int WriteConsole(char*buffer,int length);
 
 /* Address space control operations: Exit, Exec, Execv, and Join */
 
@@ -207,6 +210,8 @@ int Receive(int socketid, char *buffer, int len);
 /* Cài đặt system call int Close(int socketid). Đóng socket với 0 là thành công, -1 là lỗi. */
 int Close_(int socketid);
 void PrintConsole(char *buffer, int len);
+int ReadConsole(char *buffer, int len);
+
 
 #endif /* IN_ASM */
 

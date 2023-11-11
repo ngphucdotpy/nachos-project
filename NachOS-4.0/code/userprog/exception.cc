@@ -351,6 +351,14 @@ void ExceptionHandler(ExceptionType which)
 			ASSERTNOTREACHED();
 			break;
 		}
+		// case SC_ReadConsole:
+		// {
+		// 	break;
+		// }
+		// case SC_WriteConsole:
+		// {
+		// 	break;
+		// }
 		case SC_Read:
 		{
 			// Doc id cua file(OpenFileID)
@@ -398,57 +406,29 @@ void ExceptionHandler(ExceptionType which)
 			if (kernel->fileSystem->fileDes[id]->type == 2)
 			{
 				printf("Read file Console input.\n");
+				printf("Nhap Buffer: \n");
 				DEBUG(dbgSys, "Read file Console input.\n");
 				// Convert data in buffer to 0
-				for (int i = 0; i < size; i++)
-				{
-					buffer[i] = 0;
-				}
 
 				// Use class SynchConsoleInput to get data from console
-				int loop = 0;
 				// char *filename = NULL;
 				// kernel->synchConsoleIn;
 				// SynchConsoleInput* conslInput = new SynchConsoleInput(NULL);
-				DEBUG(dbgSys, "Vao Loop-----------------------------------------\n");
-				DEBUG(dbgSys, "Nhap Buffer: ");
-				while (loop < size)
+				DEBUG(dbgSys, "Nhap Buffer: \n");
+				cout.flush();
+				int index = 0;
+				do
 				{
-					// Create class SynchConsoleInput
+					ch = kernel->GetChar();
+					buffer[index] = ch;
+					++index;
 
-					do
-					{
-						ch = kernel->GetChar();
+				} while (ch != EOF && ch != '\n' && index < size);
+				System2User(virtAddr, index, buffer);
 
-					} while (ch == EOF);
-
-					if ((ch == '\012') || (ch == '\001'))
-					{
-						break;
-					}
-					else
-					{
-						buffer[loop] = ch;
-						++loop;
-					}
-				}
-				DEBUG(dbgSys, "Buffer: " << buffer << "\n");
-
-				DEBUG(dbgSys, "Xong Loop-----------------------------------------\n");
-
-				int size_buff = 0;
-				if (ch == '\001')
-				{
-					size_buff = -1;
-				}
-				else
-				{
-					size_buff = loop;
-				}
-				DEBUG(dbgSys, " Byte read: " << size_buff << "\n");
-				System2User(virtAddr, size_buff, buffer);
-
-				kernel->machine->WriteRegister(2, size_buff);
+				kernel->machine->WriteRegister(2, index);
+				delete buffer;
+				increasePC();
 				delete buffer;
 				DEBUG(dbgSys, "Read file thanh cong\n");
 				increasePC();
@@ -561,14 +541,16 @@ void ExceptionHandler(ExceptionType which)
 			{
 
 				int i = 0;
-				while (buffer[i] != 0 && buffer[i] != '\n')
+				while (buffer[i] != 0 &&buffer[i]!=EOF)
 				{
 					char ch = buffer[i];
 					kernel->PushChar(ch);
 					i++;
 				}
-				buffer[i] = '\n';
-				kernel->PushChar('\n');
+				if(buffer[i] == '\n')
+				{
+					kernel->PushChar('\n');
+				}
 				kernel->machine->WriteRegister(2, i - 1);
 			}
 			else
@@ -793,7 +775,33 @@ void ExceptionHandler(ExceptionType which)
 			ASSERTNOTREACHED();
 			break;
 		}
+		case SC_ReadConsole:
+		{
+			int virtAddr = kernel->machine->ReadRegister(4);
+			int len = kernel->machine->ReadRegister(5);
 
+			char *buffer = User2System(virtAddr, len);
+			cout << "Nhap buffer: \n";
+			char ch;
+			cout.flush();
+			int index = 0;
+			do
+			{
+				ch = kernel->GetChar();
+				buffer[index] = ch;
+				++index;
+
+			} while (ch != EOF && ch != '\n' && index < len);
+			System2User(virtAddr, index, buffer);
+
+			kernel->machine->WriteRegister(2, index);
+			delete buffer;
+			increasePC();
+
+			return;
+			ASSERTNOTREACHED();
+			break;
+		}
 		case SC_PrintConsole:
 		{
 			int virtAddr = kernel->machine->ReadRegister(4);

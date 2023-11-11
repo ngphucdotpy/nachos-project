@@ -6,32 +6,18 @@ int main(int argc, char *argv[])
     int fileid;
     int index;
     int idConsole;
-    char *filename;
+    char filename[maxlen];
     int len;
     /*Create a file*/
     // Create("Hello.txt");
-    int stdin;
-    int stdout;
-    stdin = Open("stdin", 2);
-    if (stdin != -1)
-    {
-        len = Read(filename, maxlen, stdin);
-        if (len <= 1)
-        {
-            return -1;
-        }
-    }
-    else
-    {
-        Close("stdin");
-    }
-    fileid = Open(filename, 0);
+    ReadConsole(filename, maxlen);
+    fileid=Open(filename,1);
     if (fileid != -1)
     {
         char *buffer = "0123456789";
         int size = 10;
         int size_buff = Read(buffer, size, fileid);
-        int idConsole = Open("stdout", 3);
+        int idConsole = Open("fileWriteConsole", 3);
         if (idConsole == -1)
         {
             Close(fileid);

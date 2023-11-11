@@ -226,6 +226,14 @@ PrintConsole:
 	syscall
 	j 	$31
 	.end PrintConsole
+
+	.globl ReadConsole
+	.ent    ReadConsole
+ReadConsole:
+	addiu $2, $0, SC_ReadConsole
+	syscall
+	j 	$31
+	.end PReadConsole
 	
 /* dummy function to keep gcc happy */
         .globl  __main
