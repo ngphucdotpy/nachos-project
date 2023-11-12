@@ -287,6 +287,10 @@ void ExceptionHandler(ExceptionType which)
 					DEBUG(dbgSys, "File closed successfully."
 									  << "\n");
 				}
+				else {
+					DEBUG(dbgSys, "File already closed." << "\n");
+					kernel->machine->WriteRegister(2, 0);
+				}
 			}
 			else
 			{
