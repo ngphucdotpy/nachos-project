@@ -428,6 +428,8 @@ void ExceptionHandler(ExceptionType which)
 					ch = kernel->GetChar();
 					if (ch != EOF && ch != '\n' && index < size)
 						buffer[index] = ch;
+					else
+						break;
 					++index;
 
 				} while (ch != EOF && ch != '\n' && index < size);
@@ -794,6 +796,8 @@ void ExceptionHandler(ExceptionType which)
 				ch = kernel->GetChar();
 				if (ch != EOF && ch != '\n' && index < len)
 					buffer[index] = ch;
+				else
+					break;
 				++index;
 
 			} while (ch != EOF && ch != '\n' && index < len);
