@@ -12,7 +12,8 @@ int main()
     int size_buff = 0;
     char *buffer = "owiehbowiebvsoivnview";
     size_buff = ReadConsole(filename, maxlen);
-    fileid = Open(filename, 1);
+    fileid=Open(filename,1);
+    // fileid = Open("b.txt", 2);
     if (fileid != 1)
     {
         size_buff = Read(buffer, 10, fileid);
