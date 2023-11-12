@@ -429,10 +429,7 @@ void ExceptionHandler(ExceptionType which)
 
 				} while (ch != EOF && ch != '\n' && index < size);
 				System2User(virtAddr, index, buffer);
-
 				kernel->machine->WriteRegister(2, index);
-				delete buffer;
-				increasePC();
 				delete buffer;
 				DEBUG(dbgSys, "Read file thanh cong\n");
 				increasePC();
