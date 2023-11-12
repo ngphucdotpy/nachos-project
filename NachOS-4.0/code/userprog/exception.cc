@@ -287,8 +287,10 @@ void ExceptionHandler(ExceptionType which)
 					DEBUG(dbgSys, "File closed successfully."
 									  << "\n");
 				}
-				else {
-					DEBUG(dbgSys, "File already closed." << "\n");
+				else
+				{
+					DEBUG(dbgSys, "File already closed."
+									  << "\n");
 					kernel->machine->WriteRegister(2, 0);
 				}
 			}
@@ -424,7 +426,8 @@ void ExceptionHandler(ExceptionType which)
 				do
 				{
 					ch = kernel->GetChar();
-					buffer[index] = ch;
+					if (ch != EOF && ch != '\n' && index < size)
+						buffer[index] = ch;
 					++index;
 
 				} while (ch != EOF && ch != '\n' && index < size);
@@ -542,13 +545,13 @@ void ExceptionHandler(ExceptionType which)
 			{
 
 				int i = 0;
-				while (buffer[i] != 0 &&buffer[i]!=EOF)
+				while (buffer[i] != 0 && buffer[i] != EOF)
 				{
 					char ch = buffer[i];
 					kernel->PushChar(ch);
 					i++;
 				}
-				if(buffer[i] == '\n')
+				if (buffer[i] == '\n')
 				{
 					kernel->PushChar('\n');
 				}
@@ -789,7 +792,8 @@ void ExceptionHandler(ExceptionType which)
 			do
 			{
 				ch = kernel->GetChar();
-				buffer[index] = ch;
+				if (ch != EOF && ch != '\n' && index < len)
+					buffer[index] = ch;
 				++index;
 
 			} while (ch != EOF && ch != '\n' && index < len);
