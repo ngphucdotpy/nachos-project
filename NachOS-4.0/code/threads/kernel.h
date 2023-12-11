@@ -20,12 +20,16 @@
 #include "machine.h"
 // #include "synchconsole.h"
 #include "networktable.h"
+#include "bitmap.h"
+#include "stable.h"
+#include "ptable.h"
 
 class PostOfficeInput;
 class PostOfficeOutput;
 class SynchConsoleInput;
 class SynchConsoleOutput;
 class SynchDisk;
+class Semaphore;
 
 class Kernel {
   public:
@@ -64,6 +68,10 @@ class Kernel {
     PostOfficeInput *postOfficeIn;
     PostOfficeOutput *postOfficeOut;
     NetworkTable *networkTable;
+    Semaphore *addrLock;
+    Bitmap *gPhysPageBitMap;
+    STable *semTab;
+    PTable *pTab;
 
     int hostName;               // machine identifier
 
