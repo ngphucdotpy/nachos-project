@@ -119,6 +119,21 @@ void ExceptionHandler(ExceptionType which)
 
 	switch (which)
 	{
+	case NoException:								// Everything ok!
+		kernel->interrupt->setStatus(SystemMode);
+		DEBUG(dbgSys, "Switch to system mode\n");
+		break;
+	case PageFaultException:    					// No valid translation found
+	case ReadOnlyException:     					// Write attempted to page marked "read-only"
+	case BusErrorException:     					// Translation resulted in an invalid physical address
+	case AddressErrorException: 					// Unaligned reference or one that was beyond the end of the address space
+	case OverflowException:     					// Integer overflow in add or sub.
+	case IllegalInstrException: 					// Unimplemented or reserved instr.
+	case NumExceptionTypes:
+        cerr << "Error " << which << " occurs\n";
+        SysHalt();
+		ASSERTNOTREACHED();
+
 	case SyscallException:
 		switch (type)
 		{
