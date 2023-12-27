@@ -57,7 +57,7 @@ SwapHeader (NoffHeader *noffH)
 #endif
 }
 
-bool AddrSpace::usedPhyPage[NumPhysPages] = {0};
+bool AddrSpace::usedPhyPage[NumPhysPages] = {false};
 
 //----------------------------------------------------------------------
 // AddrSpace::AddrSpace
@@ -69,18 +69,18 @@ bool AddrSpace::usedPhyPage[NumPhysPages] = {0};
 
 AddrSpace::AddrSpace()
 {
-    pageTable = new TranslationEntry[NumPhysPages];
-    for (int i = 0; i < NumPhysPages; i++) {
-	pageTable[i].virtualPage = i;	// for now, virt page # = phys page #
-	pageTable[i].physicalPage = i;
-	pageTable[i].valid = TRUE;
-	pageTable[i].use = FALSE;
-	pageTable[i].dirty = FALSE;
-	pageTable[i].readOnly = FALSE;  
-    }
+    // pageTable = new TranslationEntry[NumPhysPages];
+    // for (int i = 0; i < NumPhysPages; i++) {
+	// pageTable[i].virtualPage = i;	// for now, virt page # = phys page #
+	// pageTable[i].physicalPage = i;
+	// pageTable[i].valid = TRUE;
+	// pageTable[i].use = FALSE;
+	// pageTable[i].dirty = FALSE;
+	// pageTable[i].readOnly = FALSE;  
+    // }
     
     // zero out the entire address space
-    bzero(kernel->machine->mainMemory, MemorySize);
+    // bzero(kernel->machine->mainMemory, MemorySize);
 }
 
 //----------------------------------------------------------------------
@@ -138,6 +138,7 @@ AddrSpace::Load(char *fileName)
 #endif
     numPages = divRoundUp(size, PageSize);
 
+    pageTable = new TranslationEntry[numPages];
     for (unsigned int i = 0, j = 0; i < numPages; i++) {
         pageTable[i].virtualPage = i;
 
@@ -150,6 +151,7 @@ AddrSpace::Load(char *fileName)
         pageTable[i].use = false;
         pageTable[i].dirty = false;
         pageTable[i].readOnly = false;
+        // bzero(&kernel->machine->mainMemory[j * PageSize], PageSize);
     }
 
     size = numPages * PageSize;
@@ -178,7 +180,7 @@ AddrSpace::Load(char *fileName)
         executable->ReadAt(
 		&/*(kernel->machine->mainMemory[noffH.initData.virtualAddr]),
 			noffH.initData.size, noffH.initData.inFileAddr);*/
-        (kernel->machine->mainMemory[pageTable[noffH.initData.virtualAddr / PageSize].physicalPage * PageSize + (noffH.code.virtualAddr % PageSize)]),
+            (kernel->machine->mainMemory[pageTable[noffH.initData.virtualAddr / PageSize].physicalPage * PageSize + (noffH.initData.virtualAddr % PageSize)]),
             noffH.initData.size, noffH.initData.inFileAddr);
     }
 
@@ -187,8 +189,10 @@ AddrSpace::Load(char *fileName)
         DEBUG(dbgAddr, "Initializing read only data segment.");
 	DEBUG(dbgAddr, noffH.readonlyData.virtualAddr << ", " << noffH.readonlyData.size);
         executable->ReadAt(
-		&(kernel->machine->mainMemory[noffH.readonlyData.virtualAddr]),
-			noffH.readonlyData.size, noffH.readonlyData.inFileAddr);
+		&/*(kernel->machine->mainMemory[noffH.readonlyData.virtualAddr]),
+			noffH.readonlyData.size, noffH.readonlyData.inFileAddr);*/
+            (kernel->machine->mainMemory[pageTable[noffH.readonlyData.virtualAddr / PageSize].physicalPage * PageSize + (noffH.readonlyData.virtualAddr % PageSize)]),
+            noffH.readonlyData.size, noffH.readonlyData.inFileAddr);
     }
 #endif
 
