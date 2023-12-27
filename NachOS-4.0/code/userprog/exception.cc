@@ -887,7 +887,87 @@ void ExceptionHandler(ExceptionType which)
 			cerr << "Unexpected system call " << type << "\n";
 			break;
 		}
+		//add by Quan :21120537
+		case SC_CreateSemaphore:
+		{
+			int virtAddr = kernel->machine->ReadRegister(4);
+			int semval = kernel->machine->ReadRegister(5);
+			char *buffer;
+			buffer = User2System(virtAddr, 50);
+			int check=0;
+			check= kernel->semTab->Create(buffer,semval);
+			kernel->machine->WriteRegister(2, check);
+			if(check==0)
+			{
+				DEBUG(dbgSys, "\n Create semaphore is successful");
+			}
+			else
+			{
+				DEBUG(dbgSys, "\n semaphore existed or cannot create semaphore.");
+			}
+    		increasePC();
+			return;
+			ASSERTNOTREACHED();
+			break;
+		}
+		case SC_Wait:
+		{
+			int virtAddr = kernel->machine->ReadRegister(4);
+			char *buffer;
+			buffer = User2System(virtAddr, 50);
+			int check=0;
+			check=kernel->semTab->Wait(buffer);
 
+			if(check==0)
+			{
+				DEBUG(dbgSys, "\n wait semaphore.");
+			}
+			else
+			{
+				DEBUG(dbgSys, "\n Does not exists semaphore.");
+			}
+
+			kernel->machine->WriteRegister(2, check);
+    		increasePC();
+			return;
+			ASSERTNOTREACHED();
+			break;
+		}
+		
+		case SC_Signal:
+		{
+			int virtAddr = kernel->machine->ReadRegister(4);
+			char *buffer;
+			buffer = User2System(virtAddr, 50);
+			int check=0;
+			check=kernel->semTab->Signal(buffer);
+
+			if(check==0)
+			{
+				DEBUG(dbgSys, "\n Signal semaphore.");
+			}
+			else
+			{
+				DEBUG(dbgSys, "\n Does not exists semaphore.");
+			}
+
+			kernel->machine->WriteRegister(2, check);
+    		increasePC();
+			return;
+			ASSERTNOTREACHED();
+			break;
+		}
+		
+		case SC_ExecV:
+		{
+			// int id = kernel->machine->ReadRegister(4);
+    		// kernel->machine->WriteRegister(2, SysExit(id));
+    		increasePC();
+			return;
+			ASSERTNOTREACHED();
+			break;
+		}
+		
 		break;
 	default:
 		cerr << "Unexpected user mode exception" << (int)which << "\n";
