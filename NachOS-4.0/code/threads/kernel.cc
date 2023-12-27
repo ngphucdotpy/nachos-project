@@ -102,6 +102,7 @@ Kernel::Initialize()
     synchConsoleIn = new SynchConsoleInput(consoleIn); // input from stdin
     synchConsoleOut = new SynchConsoleOutput(consoleOut); // output to stdout
     synchDisk = new SynchDisk();    //
+    semTab= new STable();// declare semTab
 #ifdef FILESYS_STUB
     fileSystem = new FileSystem();
 #else
@@ -133,7 +134,7 @@ Kernel::~Kernel()
     delete fileSystem;
     delete postOfficeIn;
     delete postOfficeOut;
-
+    delete semTab;
     delete networkTable;
     
     Exit(0);
