@@ -883,10 +883,6 @@ void ExceptionHandler(ExceptionType which)
 			ASSERTNOTREACHED();
 			break;
 		}
-		default:
-			cerr << "Unexpected system call " << type << "\n";
-			break;
-		}
 		//add by Quan :21120537
 		case SC_CreateSemaphore:
 		{
@@ -915,6 +911,7 @@ void ExceptionHandler(ExceptionType which)
 			int virtAddr = kernel->machine->ReadRegister(4);
 			char *buffer;
 			buffer = User2System(virtAddr, 50);
+			DEBUG(dbgSys, buffer);
 			int check=0;
 			check=kernel->semTab->Wait(buffer);
 
@@ -941,7 +938,6 @@ void ExceptionHandler(ExceptionType which)
 			buffer = User2System(virtAddr, 50);
 			int check=0;
 			check=kernel->semTab->Signal(buffer);
-
 			if(check==0)
 			{
 				DEBUG(dbgSys, "\n Signal semaphore.");
@@ -967,6 +963,11 @@ void ExceptionHandler(ExceptionType which)
 			ASSERTNOTREACHED();
 			break;
 		}
+		default:
+			cerr << "Unexpected system call " << type << "\n";
+			break;
+		}
+		
 		
 		break;
 	default:

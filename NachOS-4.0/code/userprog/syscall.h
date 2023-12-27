@@ -35,9 +35,10 @@
 #define SC_ExecV	13
 #define SC_ThreadExit   14
 #define SC_ThreadJoin   15
-#define SC_CreateSemaphore 16
-#define SC_Wait 17
-#define SC_Signal 18
+
+#define SC_CreateSemaphore   43
+#define SC_Wait   44
+#define SC_Signal   45
 #define SC_Add		42
 
 // network
@@ -213,7 +214,6 @@ int Receive(int socketid, char *buffer, int len);
 int Close_(int socketid);
 void PrintConsole(char *buffer, int len);
 int ReadConsole(char *buffer, int len);
-
 
 #endif /* IN_ASM */
 
