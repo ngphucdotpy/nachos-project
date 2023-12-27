@@ -18,6 +18,7 @@
 #include "synchdisk.h"
 #include "post.h"
 
+#define MAX_PROCESS 10
 //----------------------------------------------------------------------
 // Kernel::Kernel
 // 	Interpret command line arguments in order to determine flags 
@@ -109,6 +110,7 @@ Kernel::Initialize()
     postOfficeIn = new PostOfficeInput(10);
     postOfficeOut = new PostOfficeOutput(reliability);
     networkTable = new NetworkTable();
+    pTab = new PTable(MAX_PROCESS);
     
     interrupt->Enable();
 }

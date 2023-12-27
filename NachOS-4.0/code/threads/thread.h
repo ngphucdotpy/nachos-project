@@ -89,6 +89,12 @@ class Thread {
 					// is called
 
     // basic thread operations
+    int processID;
+    int parrentID;
+    int exitStatus;
+    void FreeSpace() {
+        if (space != 0) delete space;
+    }
 
     void Fork(VoidFunctionPtr func, void *arg); 
     				// Make thread run (*func)(arg)
