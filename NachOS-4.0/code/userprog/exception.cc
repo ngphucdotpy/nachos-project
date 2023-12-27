@@ -921,7 +921,7 @@ void ExceptionHandler(ExceptionType which)
 			}
 			else
 			{
-				DEBUG(dbgSys, "\n Does not exists semaphore.");
+				DEBUG(dbgSys, "\n Does not exists semaphore .");
 			}
 
 			kernel->machine->WriteRegister(2, check);
@@ -936,6 +936,7 @@ void ExceptionHandler(ExceptionType which)
 			int virtAddr = kernel->machine->ReadRegister(4);
 			char *buffer;
 			buffer = User2System(virtAddr, 50);
+			DEBUG(dbgSys, buffer);
 			int check=0;
 			check=kernel->semTab->Signal(buffer);
 			if(check==0)
@@ -944,7 +945,7 @@ void ExceptionHandler(ExceptionType which)
 			}
 			else
 			{
-				DEBUG(dbgSys, "\n Does not exists semaphore.");
+				DEBUG(dbgSys, "\n Does not exists semaphore. ");
 			}
 
 			kernel->machine->WriteRegister(2, check);

@@ -85,7 +85,7 @@ int STable::Wait(char* name)
             }
         }
     }
-    printf("Khong ton tai semaphore");
+    printf("Loi Wait, Khong ton tai semaphore vs name: %s",name);
     return -1;
 }
 
@@ -108,6 +108,6 @@ int STable::Signal(char*  name)
             }
         }
     }
-    printf("Khong ton tai semaphore");
+    printf("Loi Signal,Khong ton tai semaphore vs name: %s",name);
     return -1;
 }
