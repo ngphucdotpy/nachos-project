@@ -22,7 +22,11 @@ public:
     int Create(char *name, int init);
     // If the semaphore name already exists, call this->P() to execute it. If not, report an error in Wait, Signal function
     int Wait(char *name);
-    int FindFreeSlot(int id); // Find an empty slot
+    // method Signal will be called if the simaphore name already exists
+    int Signal(char* name);
+
+    int FindFreeSlot(); // Find an empty slot
+
 };
 
 #endif
