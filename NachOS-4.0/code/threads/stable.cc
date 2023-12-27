@@ -59,7 +59,7 @@ int STable::Create(char* name, int init)
 
     // Neu tim thay slot thi bat dau nap semaphore
     this->semTab[id]= new Sem(name,init);
-
+    printf("Tao Thanh Cong, id: %d",id);
     // return 0 : thanh cong
     return 0;
 }

@@ -6,11 +6,12 @@ int main(int argc, char *argv[])
     int fileid;
     int index;
     int idConsole;
-    char filename[maxlen];
+    // char filename[maxlen];
     int len;
     /*Create a file*/
     // Create("Hello.txt");
-    ReadConsole(filename, maxlen);
+    // ReadConsole(filename, maxlen);
+    char filename[]="demo.txt";
     fileid=Open(filename,1);
     if (fileid != -1)
     {
