@@ -112,7 +112,7 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = add halt shell matmult sort segments createfile echoclient fileclient openfile readfile writefile seekfile delete cat copy concatenate exec wait signal createsemaphore
+PROGRAMS = add halt shell matmult sort segments createfile echoclient fileclient openfile readfile writefile seekfile delete cat copy concatenate exec createsemaphore program_1 program_2 test_wait_signal
 endif
 
 all: $(PROGRAMS)
@@ -198,19 +198,26 @@ copy: copy.o start.o
 
 
 
-wait.o: wait.c
-	$(CC) $(CFLAGS) -c wait.c
+program_1.o: program_1.c
+	$(CC) $(CFLAGS) -c program_1.c
 
-wait: wait.o start.o
-	$(LD) $(LDFLAGS) start.o wait.o -o wait.coff
-	$(COFF2NOFF) wait.coff wait
+program_1: program_1.o start.o
+	$(LD) $(LDFLAGS) start.o program_1.o -o program_1.coff
+	$(COFF2NOFF) program_1.coff program_1
 
-signal.o: signal.c
-	$(CC) $(CFLAGS) -c signal.c
+program_2.o: program_2.c
+	$(CC) $(CFLAGS) -c program_2.c
 
-signal: signal.o start.o
-	$(LD) $(LDFLAGS) start.o signal.o -o signal.coff
-	$(COFF2NOFF) signal.coff signal
+program_2: program_2.o start.o
+	$(LD) $(LDFLAGS) start.o program_2.o -o program_2.coff
+	$(COFF2NOFF) program_2.coff program_2
+
+test_wait_signal.o: test_wait_signal.c
+	$(CC) $(CFLAGS) -c test_wait_signal.c
+
+test_wait_signal: test_wait_signal.o start.o
+	$(LD) $(LDFLAGS) start.o test_wait_signal.o -o test_wait_signal.coff
+	$(COFF2NOFF) test_wait_signal.coff test_wait_signal
 
 createsemaphore.o: createsemaphore.c
 	$(CC) $(CFLAGS) -c createsemaphore.c
