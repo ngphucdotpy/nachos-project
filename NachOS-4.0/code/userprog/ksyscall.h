@@ -25,9 +25,21 @@ int SysAdd(int op1, int op2)
   return op1 + op2;
 }
 
+int SysExec(char* name) {
+    OpenFile* oFile = kernel->fileSystem->Open(name);
+    if (oFile == NULL) {
+        DEBUG(dbgSys, "\nExec:: Can't open this file.");
+        return -1;
+    }
 
+    delete oFile;
+    // Return child process id
+    return kernel->pTab->ExecUpdate(name);
+}
 
+int SysJoin(int id) { return kernel->pTab->JoinUpdate(id); }
 
+int SysExit(int id) { return kernel->pTab->ExitUpdate(id); }
 
 
 #endif /* ! __USERPROG_KSYSCALL_H__ */

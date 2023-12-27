@@ -119,19 +119,19 @@ void ExceptionHandler(ExceptionType which)
 
 	switch (which)
 	{
-	case NoException:								// Everything ok!
+	case NoException: // Everything ok!
 		kernel->interrupt->setStatus(SystemMode);
 		DEBUG(dbgSys, "Switch to system mode\n");
 		break;
-	case PageFaultException:    					// No valid translation found
-	case ReadOnlyException:     					// Write attempted to page marked "read-only"
-	case BusErrorException:     					// Translation resulted in an invalid physical address
-	case AddressErrorException: 					// Unaligned reference or one that was beyond the end of the address space
-	case OverflowException:     					// Integer overflow in add or sub.
-	case IllegalInstrException: 					// Unimplemented or reserved instr.
+	case PageFaultException:	// No valid translation found
+	case ReadOnlyException:		// Write attempted to page marked "read-only"
+	case BusErrorException:		// Translation resulted in an invalid physical address
+	case AddressErrorException: // Unaligned reference or one that was beyond the end of the address space
+	case OverflowException:		// Integer overflow in add or sub.
+	case IllegalInstrException: // Unimplemented or reserved instr.
 	case NumExceptionTypes:
-        cerr << "Error " << which << " occurs\n";
-        SysHalt();
+		cerr << "Error " << which << " occurs\n";
+		SysHalt();
 		ASSERTNOTREACHED();
 
 	case SyscallException:
@@ -841,10 +841,53 @@ void ExceptionHandler(ExceptionType which)
 			break;
 		}
 
+			/////////////////////////PROJECT 2///////////////////////
+
+		case SC_Exec:
+		{
+			int virtAddr = kernel->machine->ReadRegister(4);
+			char *name;
+			name = User2System(virtAddr, MaxFileLength);
+			if (name == NULL)
+			{
+				DEBUG(dbgSys, "\n Not enough memory in System");
+				ASSERT(false);
+				kernel->machine->WriteRegister(2, -1);
+				increasePC();
+				return;
+				ASSERTNOTREACHED();
+				break;
+			}
+			// Thực thi Exec, trả về kết quả cho thanh ghi
+			kernel->machine->WriteRegister(2, SysExec(name));
+			increasePC();
+			return;
+			ASSERTNOTREACHED();
+			break;
+		}
+		case SC_Join:
+		{
+			int id = kernel->machine->ReadRegister(4);
+			kernel->machine->WriteRegister(2, SysJoin(id));
+			increasePC();
+			return;
+			ASSERTNOTREACHED();
+			break;
+		}
+		case SC_Exit:
+		{
+			int id = kernel->machine->ReadRegister(4);
+    		kernel->machine->WriteRegister(2, SysExit(id));
+    		increasePC();
+			return;
+			ASSERTNOTREACHED();
+			break;
+		}
 		default:
 			cerr << "Unexpected system call " << type << "\n";
 			break;
 		}
+
 		break;
 	default:
 		cerr << "Unexpected user mode exception" << (int)which << "\n";

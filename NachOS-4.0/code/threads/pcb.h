@@ -9,8 +9,12 @@ private:
     Semaphore *multex;  // exclusive access semaphore
     int exitcode;
     int numwait; // the number of join process
+
+    Thread *thread;
+    char filename[128];
 public:
     int parentID; // The parent process’s ID
+    int processID;
     PCB(int id);  // Constructor
     ~PCB();       // Destructor
     // Load the program has the name is “filename” and the process id is pid
