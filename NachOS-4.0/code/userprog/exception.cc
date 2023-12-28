@@ -877,23 +877,33 @@ void ExceptionHandler(ExceptionType which)
 		case SC_Exit:
 		{
 			int id = kernel->machine->ReadRegister(4);
-    		kernel->machine->WriteRegister(2, SysExit(id));
-    		increasePC();
+			kernel->machine->WriteRegister(2, SysExit(id));
+			increasePC();
 			return;
 			ASSERTNOTREACHED();
 			break;
 		}
-		//add by Quan :21120537
+		// add by Quan :21120537
 		case SC_CreateSemaphore:
 		{
 			int virtAddr = kernel->machine->ReadRegister(4);
 			int semval = kernel->machine->ReadRegister(5);
 			char *buffer;
 			buffer = User2System(virtAddr, 50);
-			int check=0;
-			check= kernel->semTab->Create(buffer,semval);
+			if (buffer == NULL)
+			{
+				DEBUG(dbgSys, "\n buffer = NULL.");
+
+				kernel->machine->WriteRegister(2, -1);
+				increasePC();
+				return;
+				ASSERTNOTREACHED();
+				break;
+			}
+			int check = 0;
+			check = kernel->semTab->Create(buffer, semval);
 			kernel->machine->WriteRegister(2, check);
-			if(check==0)
+			if (check == 0)
 			{
 				DEBUG(dbgSys, "\n Create semaphore is successful");
 			}
@@ -901,7 +911,8 @@ void ExceptionHandler(ExceptionType which)
 			{
 				DEBUG(dbgSys, "\n semaphore existed or cannot create semaphore.");
 			}
-    		increasePC();
+			delete[] buffer;
+			increasePC();
 			return;
 			ASSERTNOTREACHED();
 			break;
@@ -911,10 +922,19 @@ void ExceptionHandler(ExceptionType which)
 			int virtAddr = kernel->machine->ReadRegister(4);
 			char *buffer;
 			buffer = User2System(virtAddr, 50);
-			int check=0;
-			check=kernel->semTab->Wait(buffer);
+			if (buffer == NULL)
+			{
+				DEBUG(dbgSys, "\n buffer = NULL.");
 
-			if(check==0)
+				kernel->machine->WriteRegister(2, -1);
+				increasePC();
+				return;
+				ASSERTNOTREACHED();
+				break;
+			}
+			int check = 0;
+			check = kernel->semTab->Wait(buffer);
+			if (check == 0)
 			{
 				DEBUG(dbgSys, "\n wait semaphore.");
 			}
@@ -924,20 +944,32 @@ void ExceptionHandler(ExceptionType which)
 			}
 
 			kernel->machine->WriteRegister(2, check);
-    		increasePC();
+			increasePC();
+			delete[] buffer;
+
 			return;
 			ASSERTNOTREACHED();
 			break;
 		}
-		
+
 		case SC_Signal:
 		{
 			int virtAddr = kernel->machine->ReadRegister(4);
 			char *buffer;
 			buffer = User2System(virtAddr, 50);
-			int check=0;
-			check=kernel->semTab->Signal(buffer);
-			if(check==0)
+			if (buffer == NULL)
+			{
+				DEBUG(dbgSys, "\n buffer = NULL.");
+
+				kernel->machine->WriteRegister(2, -1);
+				increasePC();
+				return;
+				ASSERTNOTREACHED();
+				break;
+			}
+			int check = 0;
+			check = kernel->semTab->Signal(buffer);
+			if (check == 0)
 			{
 				DEBUG(dbgSys, "\n Signal semaphore.");
 			}
@@ -947,17 +979,50 @@ void ExceptionHandler(ExceptionType which)
 			}
 
 			kernel->machine->WriteRegister(2, check);
-    		increasePC();
+			increasePC();
+			delete[] buffer;
 			return;
 			ASSERTNOTREACHED();
 			break;
 		}
-		
+
 		case SC_ExecV:
 		{
-			// int id = kernel->machine->ReadRegister(4);
-    		// kernel->machine->WriteRegister(2, SysExit(id));
-    		increasePC();
+			int argc = kernel->machine->ReadRegister(4);
+			int virtAdress = kernel->machine->ReadRegister(5);
+			char **argv = new char *[argc + 1];
+			for (int i = 0; i < argc; i++)
+			{
+				int argAddress;
+				kernel->machine->ReadMem(virtAdress+i*4,4,&argAddress);
+				// Read and Write parameters
+				char arg[MaxFileLength];
+				int byteRead=0;
+				do
+				{
+					kernel->machine->ReadMem(argAddress++,1,(int*)&arg[byteRead]);
+				} while (arg[byteRead++]!='\0');
+				
+				printf("argv[%d]: %s \n",i,arg);
+				argv[i]=strdup(arg);
+			}
+			argv[argc]=NULL;
+			if(argv[0]==NULL)
+			{
+				DEBUG(dbgSys, "\n argv[0] = NULL.");
+				kernel->machine->WriteRegister(2, -1);
+			}
+			else
+			{
+				// Thực thi Exec, trả về kết quả cho thanh ghi
+				kernel->machine->WriteRegister(2, SysExec(argv[0]));
+			}
+			for(int i=0;i<argc;i++)
+			{
+				delete[] argv[i];
+			}
+			delete[] argv;
+			increasePC();
 			return;
 			ASSERTNOTREACHED();
 			break;
@@ -966,8 +1031,7 @@ void ExceptionHandler(ExceptionType which)
 			cerr << "Unexpected system call " << type << "\n";
 			break;
 		}
-		
-		
+
 		break;
 	default:
 		cerr << "Unexpected user mode exception" << (int)which << "\n";
