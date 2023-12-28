@@ -214,7 +214,7 @@ int Receive(int socketid, char *buffer, int len);
 int Close_(int socketid);
 void PrintConsole(char *buffer, int len);
 int ReadConsole(char *buffer, int len);
-
+SpaceId ExecV(int argc, char* argv[]);
 #endif /* IN_ASM */
 
 #endif /* SYSCALL_H */
