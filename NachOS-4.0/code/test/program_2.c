@@ -5,11 +5,11 @@ int main()
     int i;
     char*c;
     i=0;
+    Wait("m_vn");
     while(1)
     {
         i=i+1;
-        Wait("m_vn");
-        if(i>=1000)
+        if(i>=10)
         {
             Signal("program_1");
             return;
@@ -17,8 +17,8 @@ int main()
         c="b";
         PrintConsole(c,1);
         
-        Signal("program_1");
     }
+    Signal("program_1");
     Halt();
     return 0;
 }
