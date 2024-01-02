@@ -450,7 +450,7 @@ void ExceptionHandler(ExceptionType which)
 				} while (ch != EOF && ch != '\n' && index < size);
 				System2User(virtAddr, index, buffer);
 				kernel->machine->WriteRegister(2, index);
-				delete buffer;
+				delete [] buffer;
 				DEBUG(dbgSys, "Read file thanh cong\n");
 				increasePC();
 				return;
@@ -480,7 +480,7 @@ void ExceptionHandler(ExceptionType which)
 			increasePC();
 			DEBUG(dbgSys, "Tang bien PC "
 							  << "\n");
-			delete buffer;
+			delete [] buffer;
 			return;
 			ASSERTNOTREACHED();
 			break;
@@ -497,7 +497,6 @@ void ExceptionHandler(ExceptionType which)
 			char *buffer;
 			buffer = User2System(virtAddr, size);
 			OpenFile *fileopen = kernel->fileSystem->fileDes[id];
-			DEBUG(dbgSys, "Write file " << buffer << ". Size: " << size << ", ID:" << id << ", Type:" << fileopen->type << "\n");
 
 			if (id < 0 || id > 19)
 			{
@@ -547,12 +546,12 @@ void ExceptionHandler(ExceptionType which)
 					int NewPosition = kernel->fileSystem->fileDes[id]->GetPosition();
 					kernel->machine->WriteRegister(2, NewPosition - OldPosition);
 					DEBUG(dbgSys, "Byte write: " << NewPosition - OldPosition << ".\n");
-					delete buffer;
+					delete[] buffer;
 				}
 				else
 				{
 					kernel->machine->WriteRegister(2, -1);
-					delete buffer;
+					delete [] buffer;
 				}
 				increasePC();
 				return;
@@ -582,7 +581,7 @@ void ExceptionHandler(ExceptionType which)
 			increasePC();
 			DEBUG(dbgSys, "Tang bien PC "
 							  << "\n");
-			delete buffer;
+			delete [] buffer;
 			return;
 			ASSERTNOTREACHED();
 			break;
@@ -731,7 +730,7 @@ void ExceptionHandler(ExceptionType which)
 			}
 
 			increasePC();
-			delete buffer;
+			delete [] buffer;
 
 			return;
 			ASSERTNOTREACHED();
@@ -819,7 +818,7 @@ void ExceptionHandler(ExceptionType which)
 			System2User(virtAddr, index, buffer);
 
 			kernel->machine->WriteRegister(2, index);
-			delete buffer;
+			delete [] buffer;
 			increasePC();
 
 			return;

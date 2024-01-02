@@ -15,14 +15,12 @@ int main()
 	check_Success = CreateSemaphore("program_2", 0);
 	if(check_Success == -1)
 		return 1;
-	check_Success = CreateSemaphore("m_vn", 0);
-	if(check_Success == -1)
-		return 1;
 
     check_Success= Exec("program_1");
+	check_Success= Exec("program_2");
 
-    check_Success= Exec("program_2");
-    Signal("program_1");
+    Signal("program_2");
+
     Wait("main");
     Halt();
     return 0;
