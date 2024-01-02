@@ -112,7 +112,7 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = add halt shell matmult sort segments createfile echoclient fileclient openfile readfile writefile seekfile delete cat copy concatenate exec createsemaphore program_1 program_2 test_wait_signal test_execV
+PROGRAMS = add halt shell matmult sort segments createfile echoclient fileclient openfile readfile writefile seekfile delete cat copy concatenate exec createsemaphore program_1 program_2 test_wait_signal test_execV multi_prog
 endif
 
 all: $(PROGRAMS)
@@ -247,6 +247,13 @@ test_execV.o: test_execV.c
 test_execV: test_execV.o start.o
 	$(LD) $(LDFLAGS) start.o test_execV.o -o test_execV.coff
 	$(COFF2NOFF) test_execV.coff test_execV
+
+multi_prog.o: multi_prog.c
+	$(CC) $(CFLAGS) -c multi_prog.c
+	
+multi_prog: multi_prog.o start.o
+	$(LD) $(LDFLAGS) start.o multi_prog.o -o multi_prog.coff
+	$(COFF2NOFF) multi_prog.coff multi_prog
 
 shell.o: shell.c
 	$(CC) $(CFLAGS) -c shell.c

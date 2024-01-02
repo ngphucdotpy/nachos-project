@@ -4,8 +4,8 @@
 int main()
 {
     int len;
-    char a[maxlen];
-    char b[maxlen];
+    char a[] = "demo.txt";
+    char b[] = "demo_copy.txt";
     int fileid_b;
     int fileid_a;
     /*Create a file*/
@@ -13,8 +13,8 @@ int main()
     int read_a;
     int read_b;
     int length = maxlen;
-    ReadConsole(a, maxlen);
-    ReadConsole(b, maxlen);
+    // ReadConsole(a, maxlen);
+    // ReadConsole(b, maxlen);
     fileid_b = Create(b);
     if (fileid_b == 1)
     {
