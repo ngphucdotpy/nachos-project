@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     /*Create a file*/
     // Create("Hello.txt");
     // ReadConsole(filename, maxlen);
-    char filename[]="demo.txt";
+    char filename[]="a.txt";
     fileid=Open(filename,1);
     if (fileid != -1)
     {
@@ -29,10 +29,13 @@ int main(int argc, char *argv[])
         {
             if (size_buff != size)
             {
-                Write(buffer, size_buff, idConsole);
+                    PrintConsole(buffer,size_buff);
+                // Write(buffer, size_buff, idConsole);
                 break;
             }
-            Write(buffer, size, idConsole);
+                    PrintConsole(buffer,size);
+            
+            // Write(buffer, size, idConsole);
             size_buff = Read(buffer, size, fileid);
         }
         Close(idConsole);

@@ -59,7 +59,7 @@ int STable::Create(char* name, int init)
 
     // Neu tim thay slot thi bat dau nap semaphore
     this->semTab[id]= new Sem(name,init);
-    printf("Tao Thanh Cong, id: %d",id);
+    printf("Tao Thanh Cong, id: %d \n",id);
     // return 0 : thanh cong
     return 0;
 }
@@ -67,25 +67,25 @@ int STable::Create(char* name, int init)
 // Method Wait
 int STable::Wait(char* name)
 {
-    printf(name);
+    // printf(name);
     for(int i=0;i<MAX_SEMAPHORE;i++)
     {
         //Kiem tra xem i (id) da duoc nap semaphore hay chua
         if(bm->Test(i))
         {
-            printf(semTab[i]->GetName());
+            // printf(semTab[i]->GetName());
             // neu co thi tien hanh so xanh name cua semaphore vs name trong semTab
             if(strcmp(name, semTab[i]->GetName())==0)
             {
                 // Neu ton tai thi cho semaphore down()
-                printf("Wait semaphore");
+                // printf("Wait semaphore \n");
                 semTab[i]->wait();
                 //return 0 : thanh cong
                 return 0;
             }
         }
     }
-    printf("Loi Wait, Khong ton tai semaphore vs name: %s",name);
+    printf("Loi Wait, Khong ton tai semaphore vs name: %s \n",name);
     return -1;
 }
 
@@ -102,7 +102,7 @@ int STable::Signal(char*  name)
             {
                 // Neu ton tai thi cho semaphore up()
                 semTab[i]->signal();
-                printf("Signal semaphore");
+                // printf("Signal semaphore \n");
                 //return 0 : thanh cong
                 return 0;
             }
