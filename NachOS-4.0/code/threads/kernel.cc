@@ -112,6 +112,7 @@ Kernel::Initialize()
     postOfficeOut = new PostOfficeOutput(reliability);
     networkTable = new NetworkTable();
     pTab = new PTable(MAX_PROCESS);
+    addrLock = new Semaphore("addrLock",1);
     
     interrupt->Enable();
 }

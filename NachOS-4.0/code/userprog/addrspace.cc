@@ -20,6 +20,7 @@
 #include "addrspace.h"
 #include "machine.h"
 #include "noff.h"
+#include "synch.h"
 
 //----------------------------------------------------------------------
 // SwapHeader
@@ -142,8 +143,17 @@ AddrSpace::Load(char *fileName)
     for (unsigned int i = 0, j = 0; i < numPages; i++) {
         pageTable[i].virtualPage = i;
 
+        kernel->addrLock->P();
+
         while (j < NumPhysPages && AddrSpace::usedPhyPage[j] == true)
             j++;
+
+        // Check if j has exceeded NumPhysPages
+        if (j == NumPhysPages) {
+            printf("Error: No free physical pages available.\n");
+            kernel->addrLock->V();
+            return FALSE; // Return false if no free physical pages are available
+        }
 
         AddrSpace::usedPhyPage[j] = true;
         pageTable[i].physicalPage = j;
@@ -151,7 +161,8 @@ AddrSpace::Load(char *fileName)
         pageTable[i].use = false;
         pageTable[i].dirty = false;
         pageTable[i].readOnly = false;
-        // bzero(&kernel->machine->mainMemory[j * PageSize], PageSize);
+
+        kernel->addrLock->V();
     }
 
     size = numPages * PageSize;
