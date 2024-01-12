@@ -14,5 +14,4 @@ int main()
     {
         // xuất thông báo tạo tập tin thành công
     }
-    Halt();
 }

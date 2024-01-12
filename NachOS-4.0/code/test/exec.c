@@ -3,10 +3,10 @@
 #define stdout 1
 
 int main() {
-    int pid;
+    int pid,pid2;
     pid = Exec("createfile");
-    if (pid < 0) {
-        Write("Exec failed: ", 14, stdout);
-    } else
-        Join(pid);
+    pid2 = Exec("delete");
+    
+    Join(pid);
+    Join(pid2);
 }
