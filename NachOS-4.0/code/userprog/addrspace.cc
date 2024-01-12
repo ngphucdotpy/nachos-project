@@ -89,8 +89,7 @@ AddrSpace::AddrSpace()
 
 AddrSpace::~AddrSpace()
 {
-    int i;
-    for (i = 0; i < numPages; i++) {
+    for (int i = 0; i < numPages; i++) {
         kernel->gPhysPageBitMap->Clear(pageTable[i].physicalPage);
     }
     delete[] pageTable;
@@ -124,6 +123,7 @@ AddrSpace::Load(char* fileName)
         (WordToHost(noffH.noffMagic) == NOFFMAGIC))
         SwapHeader(&noffH);
     ASSERT(noffH.noffMagic == NOFFMAGIC);
+
     kernel->addrLock->P();
 
 #ifdef RDATA
@@ -154,22 +154,16 @@ AddrSpace::Load(char* fileName)
         return FALSE;
     }
     DEBUG(dbgAddr, "Initializing address space: " << numPages << ", " << size);
-    // first, set up the translation
+    
     pageTable = new TranslationEntry[numPages];
     for (int i = 0; i < numPages; i++) {
-        pageTable[i].virtualPage = i;  // for now, virtual page # = phys page #
+        pageTable[i].virtualPage = i;
         pageTable[i].physicalPage = kernel->gPhysPageBitMap->FindAndSet();
-        // cerr << pageTable[i].physicalPage << endl;
         pageTable[i].valid = TRUE;
         pageTable[i].use = FALSE;
         pageTable[i].dirty = FALSE;
-        pageTable[i].readOnly = FALSE;  // if the code segment was entirely on
-        // a separate page, we could set its
-        // pages to be read-only
-        // xóa các trang này trên memory
-        bzero(&(kernel->machine
-            ->mainMemory[pageTable[i].physicalPage * PageSize]),
-            PageSize);
+        pageTable[i].readOnly = FALSE;
+        bzero(&(kernel->machine->mainMemory[pageTable[i].physicalPage * PageSize]), PageSize);
         DEBUG(dbgAddr, "phyPage " << pageTable[i].physicalPage);
     }
 
