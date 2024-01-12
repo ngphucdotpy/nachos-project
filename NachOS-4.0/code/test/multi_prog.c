@@ -3,14 +3,12 @@
 int main()
 {
     SpaceId newProc1;
-    SpaceId newProc2;
+    SpaceId newProc3;
 
-    newProc2 = Exec("copy");
+    newProc3 = Exec("copy");
     newProc1 = Exec("cat");
-
-    Join(newProc1); 
-    Join(newProc2); 
-
+    Join(newProc1);
+    Join(newProc3);
 
     Halt();
 }

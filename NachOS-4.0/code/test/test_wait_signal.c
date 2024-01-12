@@ -9,17 +9,16 @@ int main()
 	check_Success = CreateSemaphore("main",0);
 	if(check_Success == -1)
 		return 1;
-	check_Success = CreateSemaphore("program_1", 0);
+	check_Success = CreateSemaphore("pro1", 0);
 	if(check_Success == -1)
 		return 1;
-	check_Success = CreateSemaphore("program_2", 0);
+	check_Success = CreateSemaphore("pro2", 0);
 	if(check_Success == -1)
 		return 1;
 
     check_Success= Exec("program_1");
-	check_Success= Exec("program_2");
-
-    Signal("program_1");
+		check_Success= Exec("program_2");
+    Signal("pro1");
 
     Wait("main");
     Halt();
