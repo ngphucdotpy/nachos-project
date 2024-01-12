@@ -44,7 +44,6 @@ int main()
         if (idConsole == -1)
         {
             Close(fileid);
-            Halt();
             return;
         }
         while (size_buff > 0)
@@ -65,6 +64,5 @@ int main()
     Close(fileid);
     Signal("main");
 
-    Halt();
     return 0;
 }

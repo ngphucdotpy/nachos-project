@@ -32,7 +32,6 @@ int main()
     if (fileid_b == 1)
     {
         Signal("main");
-        Halt();
         return 0;
     }
     Close(fileid_b);
@@ -59,6 +58,5 @@ int main()
     }
     Close(fileid_a);
     Signal("program_1");
-    Halt();
     return 0;
 }
