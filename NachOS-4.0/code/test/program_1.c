@@ -5,7 +5,6 @@ int main()
 {
     int i;
     char*c;
-    Wait("pro1");
     i=0;
     while(1)
     {
