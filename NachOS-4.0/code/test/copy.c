@@ -42,6 +42,6 @@ int main()
         Close(fileid_b);
     }
     Close(fileid_a);
-    Halt();
+    // Halt();
     return 0;
 }

@@ -41,5 +41,5 @@ int main(int argc, char *argv[])
         Close(idConsole);
     }
     Close(fileid);
-    Halt();
+    // Halt();
 }
