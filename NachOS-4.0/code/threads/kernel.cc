@@ -113,6 +113,7 @@ Kernel::Initialize()
     networkTable = new NetworkTable();
     pTab = new PTable(MAX_PROCESS);
     addrLock = new Semaphore("addrLock",1);
+    gPhysPageBitMap = new Bitmap(NumPhysPages);
     
     interrupt->Enable();
 }

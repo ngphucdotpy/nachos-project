@@ -19,35 +19,34 @@
 #define UserStackSize		1024 	// increase this as necessary!
 
 class AddrSpace {
-  public:
-    AddrSpace();			// Create an address space.
-    ~AddrSpace();			// De-allocate an address space
+public:
+  AddrSpace();			// Create an address space.
+  ~AddrSpace();			// De-allocate an address space
 
-    bool Load(char *fileName);		// Load a program into addr space from
-                                        // a file
-					// return false if not found
+  bool Load(char* fileName);		// Load a program into addr space from
+  // a file
+// return false if not found
 
-    void Execute();             	// Run a program
-					// assumes the program has already
-                                        // been loaded
+  void Execute();             	// Run a program
+  // assumes the program has already
+                                // been loaded
 
-    void SaveState();			// Save/restore address space-specific
-    void RestoreState();		// info on a context switch 
+  void SaveState();			// Save/restore address space-specific
+  void RestoreState();		// info on a context switch 
 
-    // Translate virtual address _vaddr_
-    // to physical address _paddr_. _mode_
-    // is 0 for Read, 1 for Write.
-    ExceptionType Translate(unsigned int vaddr, unsigned int *paddr, int mode);
-    static bool usedPhyPage[NumPhysPages];
+  // Translate virtual address _vaddr_
+  // to physical address _paddr_. _mode_
+  // is 0 for Read, 1 for Write.
+  ExceptionType Translate(unsigned int vaddr, unsigned int* paddr, int mode);
 
-  private:
-    TranslationEntry *pageTable;	// Assume linear page table translation
-					// for now!
-    unsigned int numPages;		// Number of pages in the virtual 
-					// address space
+private:
+  TranslationEntry* pageTable;	// Assume linear page table translation
+  // for now!
+  unsigned int numPages;		// Number of pages in the virtual 
+  // address space
 
-    void InitRegisters();		// Initialize user-level CPU registers,
-					// before jumping to user code
+  void InitRegisters();		// Initialize user-level CPU registers,
+  // before jumping to user code
 
 };
 
