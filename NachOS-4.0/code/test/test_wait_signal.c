@@ -18,7 +18,7 @@ int main()
 
     check_Success= Exec("program_1");
 		check_Success= Exec("program_2");
-    Signal("pro1");
+    // Signal("pro1");
 
     Wait("main");
     Halt();
