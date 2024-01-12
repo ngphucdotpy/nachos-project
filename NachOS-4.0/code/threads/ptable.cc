@@ -22,7 +22,6 @@ PTable::~PTable() {
 
 int PTable::ExecUpdate(char* name) {
     // Gọi mutex->P(); để giúp tránh tình trạng nạp 2 tiến trình cùng 1 lúc.
-    DEBUG(dbgSys, "\n Bat dau goi P");
     bmsem->P();
     // Kiểm tra tính hợp lệ của chương trình “name”.
     // Kiểm tra sự tồn tại của chương trình “name” bằng cách gọi phương thức
